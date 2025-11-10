@@ -14,7 +14,9 @@ const NavTabs: React.FC<NavTabsProps> = ({ activeSection, setActiveSection }) =>
     { id: AppSection.Protocols, label: 'شرح البروتوكولات' },
     { id: AppSection.IPv6, label: 'شرح IPv6' },
     { id: AppSection.Commands, label: 'قائمة الأوامر' },
-    { id: AppSection.CCNA_SUMMARY, label: 'تلخيص CCNA' },
+    { id: AppSection.CCNA_SUMMARY, label: 'تلخيص CCNA 1' },
+    { id: AppSection.CCNA2_SUMMARY, label: 'تلخيص CCNA 2' },
+    { id: AppSection.CCNA3_SUMMARY, label: 'تلخيص CCNA 3' },
   ];
 
   return (
