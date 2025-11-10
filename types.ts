@@ -13,6 +13,8 @@ export enum AppSection {
   FLASHCARDS = 'flashcards',
 }
 
+export type CurriculumLevel = 'ccna1' | 'ccna2' | 'ccna3';
+
 export enum QuestionType {
   // Subnetting
   FULL_DETAILS,

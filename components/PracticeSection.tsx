@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { QuestionType, SubnettingQuestion, SubnettingSolution } from '../types';
+import { QuestionType, SubnettingQuestion, SubnettingSolution, CurriculumLevel } from '../types';
 import { generateRandomQuestion, calculateSubnetDetails, calculateCidrForHosts, calculateVlsmLayout, evaluateAcl, findStpRootBridge, getProtocolAnswer } from '../services/subnettingCalculator';
 
 // --- State Types ---
@@ -10,6 +10,7 @@ type PracticeMode = 'test' | 'calculator';
 const PracticeSection: React.FC = () => {
     // --- Mode State ---
     const [practiceMode, setPracticeMode] = useState<PracticeMode>('test');
+    const [activeCurriculum, setActiveCurriculum] = useState<CurriculumLevel>('ccna1');
 
     // --- Test Mode State ---
     const [question, setQuestion] = useState<SubnettingQuestion | null>(null);
@@ -54,8 +55,8 @@ const PracticeSection: React.FC = () => {
         if (savedStats) setStats(JSON.parse(savedStats));
     }, []);
 
-    const newQuestion = useCallback(() => {
-        const q = generateRandomQuestion();
+    const newQuestion = useCallback((curriculum: CurriculumLevel) => {
+        const q = generateRandomQuestion(curriculum);
         setQuestion(q);
 
         // Reset all states
@@ -121,7 +122,11 @@ const PracticeSection: React.FC = () => {
         }
     }, []);
 
-    useEffect(() => { if (practiceMode === 'test') newQuestion() }, [newQuestion, practiceMode]);
+    useEffect(() => {
+        if (practiceMode === 'test') {
+            newQuestion(activeCurriculum);
+        }
+    }, [newQuestion, practiceMode, activeCurriculum]);
 
     // --- Handlers ---
     const checkAnswers = () => {
@@ -457,9 +462,33 @@ const PracticeSection: React.FC = () => {
         if (!question) {
             return <div className="text-center p-8">جاري تحميل السؤال...</div>;
         }
+        
+        const curriculumTabs: { id: CurriculumLevel; label: string }[] = [
+            { id: 'ccna1', label: 'CCNA 1' },
+            { id: 'ccna2', label: 'CCNA 2' },
+            { id: 'ccna3', label: 'CCNA 3' },
+        ];
+
         return (
             <div>
                 <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">اختبر معلوماتك</h2>
+
+                <div className="flex justify-center border-b border-gray-600 mb-6">
+                    {curriculumTabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveCurriculum(tab.id)}
+                            className={`py-2 px-6 font-semibold transition-colors duration-300 focus:outline-none ${
+                                activeCurriculum === tab.id
+                                ? 'border-b-2 border-yellow-400 text-yellow-400'
+                                : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="max-w-md mx-auto bg-gray-900/50 rounded-lg p-3 mb-6 flex justify-around items-center">
                     <div className="text-center"><span className="text-sm text-gray-400">صحيحة</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
                     <div className="text-center"><span className="text-sm text-gray-400">خاطئة</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
@@ -488,7 +517,7 @@ const PracticeSection: React.FC = () => {
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                      <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">تحقق من الإجابة</button>
                     <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? 'إخفاء الحل' : 'أظهر الحل'}</button>
-                    <button onClick={newQuestion} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
+                    <button onClick={() => newQuestion(activeCurriculum)} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
                 </div>
             </div>
         )

@@ -73,7 +73,7 @@ const Chapter1: React.FC = () => (
                     <p className="text-sm mt-2">
                         هو نطاق الشبكة الذي تصل إليه رسالة البث (Broadcast). المحولات، بشكل افتراضي، <strong className="text-yellow-400">تمرر</strong> رسائل البث إلى جميع المنافذ.
                          <br/><br/>
-                       <strong className="text-red-400">الأجهزة التي توقف البث:</strong> الموجهات (Routers) فقط هي التي تقوم بتقسيم نطاقات البث. كل واجهة على الراوتر هي نطاق بث منفصل. لاحقًا، سنتعلم كيف يمكن لـ VLANs أن تقسم نطاقات البث على مستوى المحول.
+                       <strong className="text-red-400">الأجهزة التي توقف البث:</strong> الموجهات (Routers) فقط هي التي تقوم بتقسيم نطاقات البث. لاحقًا، سنتعلم كيف يمكن لـ VLANs أن تقسم نطاقات البث على مستوى المحول.
                     </p>
                 </div>
             </div>
@@ -500,7 +500,7 @@ Router(config-if)# ip helper-address 10.10.10.254`}
 const Chapter7: React.FC = () => (
     <>
         <section>
-            <h4 className="text-2xl font-bold text-white mb-3">مقدمة: عنونة IPv6 الديناميكية</h4>
+            <h4 className="text-2xl font-bold text-white mb-3">الجزء الأول: عنونة IPv6 الديناميكية</h4>
             <p>
                 بسبب وفرة العناوين في IPv6، هناك طرق أكثر تطورًا ومرونة لتعيين العناوون للأجهزة ديناميكيًا مقارنة بـ IPv4. الطريقتان الرئيسيتان هما SLAAC و DHCPv6.
             </p>
@@ -513,59 +513,113 @@ const Chapter7: React.FC = () => (
             </p>
              <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
                 <li><strong className="text-cyan-400">Router Solicitation (RS):</strong> رسالة يرسلها العميل عندما يتصل بالشبكة لأول مرة، يسأل فيها "هل يوجد أي موجه هنا؟ أحتاج إلى معلومات الشبكة".</li>
-                <li><strong className="text-cyan-400">Router Advertisement (RA):</strong> رسالة يرسلها الموجه بشكل دوري أو كرد على رسالة RS. تحتوي هذه الرسالة على معلومات حيوية مثل بادئة الشبكة (Network Prefix) وطول البادئة، وأحيانًا معلومات أخرى مثل عنوان DNS.</li>
+                <li><strong className="text-cyan-400">Router Advertisement (RA):</strong> رسالة يرسلها الموجه بشكل دوري أو كرد على رسالة RS. تحتوي هذه الرسالة على معلومات حيوية مثل بادئة الشبكة وطولها، بالإضافة إلى "أعلام" (flags) تخبر العميل بكيفية الحصول على عنوانه.
+                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
+                        <li><strong>M Flag (Managed Address Configuration):</strong> إذا كانت قيمتها 1، يجب على العميل الحصول على عنوانه من خادم DHCPv6 (Stateful).</li>
+                        <li><strong>O Flag (Other Configuration):</strong> إذا كانت قيمتها 1، يجب على العميل الحصول على معلومات أخرى (مثل DNS) من خادم DHCPv6.</li>
+                    </ul>
+                </li>
             </ul>
         </section>
         
         <section>
-            <h4 className="text-2xl font-bold text-white mb-3">الطريقة الأولى: SLAAC</h4>
+            <h4 className="text-2xl font-bold text-white mb-3">طرق العنونة الديناميكية الثلاث</h4>
+            <p> بناءً على الأعلام في رسالة RA، سيستخدم العميل إحدى الطرق الثلاث التالية:</p>
+
+            <h5 className="font-bold text-lg text-cyan-400 mt-4">الطريقة الأولى: SLAAC فقط (M=0, O=0)</h5>
             <p>
                 <strong className="text-cyan-400">SLAAC (Stateless Address Autoconfiguration)</strong> هي طريقة تسمح للجهاز بتكوين عنوان IPv6 العالمي الخاص به (GUA) بنفسه <strong className="text-yellow-400">بدون الحاجة إلى خادم DHCP</strong>.
+                يأخذ الجهاز بادئة الشبكة من رسالة RA ويقوم بإنشاء معرف الواجهة الخاص به.
             </p>
-            <p><strong>كيف تعمل:</strong></p>
-            <ol className="list-decimal list-inside space-y-2">
-                <li>يرسل الجهاز رسالة RS.</li>
-                <li>يستلم رسالة RA من الموجه، والتي تحتوي على بادئة الشبكة (أول 64 بت).</li>
-                <li>يقوم الجهاز بإنشاء معرف الواجهة (Interface ID) الخاص به (آخر 64 بت) باستخدام إحدى طريقتين:
-                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
-                        <li><strong>EUI-64:</strong> طريقة قديمة تعتمد على عنوان MAC الخاص بالجهاز.</li>
-                        <li><strong>Randomly Generated:</strong> الطريقة الحديثة والمفضلة لأسباب أمنية.</li>
-                    </ul>
-                </li>
-                 <li>يجمع الجهاز بين بادئة الشبكة ومعرف الواجهة للحصول على عنوان GUA كامل وفريد.</li>
-            </ol>
+            
+            <h5 className="font-bold text-lg text-cyan-400 mt-4">الطريقة الثانية: SLAAC مع DHCPv6 (Stateless DHCPv6) (M=0, O=1)</h5>
+            <p>
+                يستخدم هذا الوضع <strong className="text-yellow-400">مزيجًا</strong>. يحصل الجهاز على عنوانه باستخدام SLAAC (من رسالة RA)، ولكنه يتصل بخادم DHCPv6 للحصول على معلومات إضافية فقط (مثل عنوان DNS).
+            </p>
+            
+            <h5 className="font-bold text-lg text-cyan-400 mt-4">الطريقة الثالثة: DHCPv6 فقط (Stateful DHCPv6) (M=1)</h5>
+            <p>
+                هذا الوضع هو الأقرب إلى DHCPv4. تخبر رسالة RA العميل بتجاهل المعلومات فيها والاتصال مباشرة بخادم DHCPv6 ليقوم الخادم <strong className="text-yellow-400">بتعيين وتتبع</strong> عنوان GUA الكامل للجهاز وجميع المعلومات الأخرى.
+            </p>
+
+            <div className="overflow-x-auto mt-6">
+                <table className="w-full text-sm text-center text-gray-300 bg-gray-950 rounded-lg">
+                    <thead className="text-xs text-cyan-300 uppercase bg-gray-700/50">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">الطريقة</th>
+                            <th scope="col" className="px-6 py-3">علم M في RA</th>
+                            <th scope="col" className="px-6 py-3">علم O في RA</th>
+                            <th scope="col" className="px-6 py-3">مصدر عنوان GUA</th>
+                            <th scope="col" className="px-6 py-3">مصدر معلومات DNS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr className="border-b border-gray-700">
+                            <td className="px-6 py-4 font-bold text-white">SLAAC Only</td>
+                            <td className="px-6 py-4 font-mono">0</td>
+                            <td className="px-6 py-4 font-mono">0</td>
+                            <td className="px-6 py-4">رسالة RA</td>
+                            <td className="px-6 py-4">رسالة RA (باستخدام RDNSS)</td>
+                        </tr>
+                        <tr className="border-b border-gray-700">
+                            <td className="px-6 py-4 font-bold text-white">Stateless DHCPv6</td>
+                            <td className="px-6 py-4 font-mono">0</td>
+                            <td className="px-6 py-4 font-mono">1</td>
+                            <td className="px-6 py-4">رسالة RA</td>
+                            <td className="px-6 py-4 text-green-400">خادم DHCPv6</td>
+                        </tr>
+                        <tr>
+                            <td className="px-6 py-4 font-bold text-white">Stateful DHCPv6</td>
+                            <td className="px-6 py-4 font-mono text-red-400">1</td>
+                            <td className="px-6 py-4 font-mono">غير مهم</td>
+                            <td className="px-6 py-4 text-green-400">خادم DHCPv6</td>
+                            <td className="px-6 py-4 text-green-400">خادم DHCPv6</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <hr className="border-gray-600 my-8" />
+
+        <section>
+            <h4 className="text-2xl font-bold text-white mb-3">الجزء الثاني: مفاهيم الشبكات الواسعة (WAN)</h4>
+            <p>
+                الشبكة الواسعة (Wide Area Network) هي شبكة اتصالات تمتد على منطقة جغرافية واسعة، مثل ربط مكاتب الشركة في مدن مختلفة أو توفير اتصال بالإنترنت. على عكس الشبكات المحلية (LANs) التي نمتلكها ونديرها، غالبًا ما نعتمد على <strong className="text-cyan-400">مزودي الخدمة (Service Providers)</strong> لتوفير اتصالات WAN.
+            </p>
         </section>
 
         <section>
-            <h4 className="text-2xl font-bold text-white mb-3">الطريقة الثانية: DHCPv6</h4>
-            <p>
-                يعمل DHCPv6 عندما تحتاج الشبكة إلى تحكم أكبر في العناوين أو عندما لا توفر رسالة RA كل المعلومات المطلوبة (مثل عنوان DNS). له وضعان:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-green-400">Stateless DHCPv6 (بدون حالة)</h5>
-                    <p className="text-sm mt-2">
-                       يستخدم هذا الوضع <strong className="text-yellow-400">مزيجًا</strong>. يحصل الجهاز على بادئة الشبكة من رسالة RA (باستخدام SLAAC)، ولكنه يتصل بخادم DHCPv6 للحصول على معلومات إضافية فقط (مثل DNS).
-                    </p>
-                </div>
-                 <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-orange-400">Stateful DHCPv6 (بحالة)</h5>
-                    <p className="text-sm mt-2">
-                        هذا الوضع هو الأقرب إلى DHCPv4. لا يستخدم الجهاز رسالة RA لتكوين عنوانه. بدلاً من ذلك، يتصل مباشرة بخادم DHCPv6 ليقوم الخادم <strong className="text-yellow-400">بتعيين وتتبع</strong> عنوان GUA الكامل للجهاز.
-                    </p>
-                </div>
-            </div>
+            <h4 className="text-2xl font-bold text-white mb-3">تقنيات WAN الشائعة</h4>
+            <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
+                <li><strong className="text-cyan-400">الخطوط المؤجرة (Leased Lines):</strong> اتصال مخصص ومباشر (من نقطة إلى نقطة) بين موقعين. موثوقة وآمنة ولكنها مكلفة.</li>
+                <li><strong className="text-cyan-400">Ethernet WAN:</strong> استخدام تقنية الإيثرنت لتوفير اتصالات WAN، مما يبسط التكامل مع الشبكات المحلية. (مثل Metro Ethernet).</li>
+                <li><strong className="text-cyan-400">MPLS (Multiprotocol Label Switching):</strong> تقنية شائعة لمزودي الخدمة توجه حركة المرور بناءً على "العلامات" بدلاً من عناوين IP، مما يوفر المرونة وجودة الخدمة (QoS).</li>
+                <li><strong className="text-cyan-400">الإنترنت كـ WAN:</strong> استخدام اتصالات الإنترنت التجارية (مثل DSL, Cable, Fiber) مع تقنيات VPN لإنشاء اتصالات WAN آمنة وفعالة من حيث التكلفة.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h4 className="text-2xl font-bold text-white mb-3">بروتوكولات تغليف WAN للطبقة الثانية</h4>
+            <p>عند استخدام الخطوط المؤجرة التسلسلية، يتم استخدام بروتوكولات تغليف محددة على الرابط:</p>
+            <ul className="list-disc list-inside space-y-2">
+                <li><strong className="text-yellow-400">HDLC (High-Level Data Link Control):</strong> بروتوكول قديم، نسخة سيسكو منه خاصة بأجهزتها فقط ولا تعمل مع أجهزة الشركات الأخرى.</li>
+                <li><strong className="text-yellow-400">PPP (Point-to-Point Protocol):</strong> بروتوكول قياسي مفتوح، وهو الأكثر شيوعًا ومرونة. يوفر ميزات إضافية مهمة مثل المصادقة (CHAP, PAP) وضغط البيانات.</li>
+            </ul>
         </section>
 
         <section>
             <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل السابع</h4>
              <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
+                <li>ماذا تخبر علامة M=1 في رسالة RA العميل أن يفعل؟</li>
+                <li>في طريقة Stateless DHCPv6، من أين يحصل العميل على عنوان GUA الخاص به، ومن أين يحصل على عنوان DNS؟</li>
+                <li>أي طريقة عنونة IPv6 ديناميكية هي الأقرب لعمل DHCP في IPv4؟</li>
                 <li>ما هي رسالتا ICMPv6 اللتان تشكلان أساس عنونة IPv6 الديناميكية؟</li>
-                <li>ما هو الفرق الرئيسي بين SLAAC و DHCPv6 Stateful من حيث من المسؤول عن تكوين عنوان GUA الكامل للجهاز؟</li>
-                <li>في أي سيناريو قد تحتاج إلى استخدام Stateless DHCPv6؟</li>
-                <li>ما هي قطعة المعلومات الأساسية التي يحصل عليها العميل من رسالة RA ليتمكن من تكوين عنوانه باستخدام SLAAC؟</li>
-                <li>كيف يقوم جهاز بتكوين معرف الواجهة (Interface ID) الخاص به في IPv6 (اذكر طريقتين)؟</li>
-            </ol>
+                <hr className="border-gray-700 my-2" />
+                <li>ما هو الفرق الرئيسي بين LAN و WAN من حيث الملكية والإدارة؟</li>
+                <li>ما هي الميزة الرئيسية لاستخدام الإنترنت مع VPN كحل WAN مقارنة بالخطوط المؤجرة التقليدية؟</li>
+                <li>ما هو البروتوكول القياسي المفتوح الذي يوفر المصادقة على روابط WAN من نقطة إلى نقطة؟</li>
+             </ol>
         </section>
     </>
 );
@@ -1261,7 +1315,7 @@ const CCNA2SummarySection: React.FC = () => {
         { id: 4, title: 'الفصل 4: مفاهيم STP', content: <Chapter4 /> },
         { id: 5, title: 'الفصل 5: قنوات EtherChannel', content: <Chapter5 /> },
         { id: 6, title: 'الفصل 6: بروتوكول DHCPv4', content: <Chapter6 /> },
-        { id: 7, title: 'الفصل 7: SLAAC و DHCPv6', content: <Chapter7 /> },
+        { id: 7, title: 'الفصل 7: عنونة IPv6 الديناميكية ومفاهيم WAN', content: <Chapter7 /> },
         { id: 8, title: 'الفصل 8: مفاهيم FHRP', content: <Chapter8 /> },
         { id: 9, title: 'الفصل 9: مفاهيم أمان الشبكات المحلية', content: <Chapter9 /> },
         { id: 10, title: 'الفصل 10: تكوين أمان المحولات', content: <Chapter10 /> },

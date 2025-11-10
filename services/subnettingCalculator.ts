@@ -1,4 +1,4 @@
-import { SubnettingQuestion, SubnettingSolution, QuestionType } from '../types';
+import { SubnettingQuestion, SubnettingSolution, QuestionType, CurriculumLevel } from '../types';
 
 function ipToLong(ip: string): number {
   return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
@@ -108,16 +108,44 @@ function generateRandomMac() {
     return '00:1A:2B:' + Array(3).fill(0).map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase()).join(':');
 }
 
-export function generateRandomQuestion(): SubnettingQuestion {
-    const questionTypes = [
+export function generateRandomQuestion(curriculum: CurriculumLevel): SubnettingQuestion {
+    const ccna1Types: QuestionType[] = [
         QuestionType.FULL_DETAILS,
+        QuestionType.HOW_MANY_SUBNETS,
         QuestionType.HOW_MANY_HOSTS,
         QuestionType.SCENARIO_CIDR_FOR_HOSTS,
-        QuestionType.VLSM_SCENARIO,
-        QuestionType.ACL_EVALUATION,
-        QuestionType.STP_ROOT_BRIDGE,
         QuestionType.PROTOCOL_IDENTIFICATION,
     ];
+
+    const ccna2Types: QuestionType[] = [
+        QuestionType.VLSM_SCENARIO,
+        QuestionType.STP_ROOT_BRIDGE,
+    ];
+
+    const ccna3Types: QuestionType[] = [
+        QuestionType.ACL_EVALUATION,
+    ];
+    
+    let questionTypes: QuestionType[];
+
+    switch (curriculum) {
+        case 'ccna1':
+            questionTypes = ccna1Types;
+            break;
+        case 'ccna2':
+            questionTypes = ccna2Types;
+            break;
+        case 'ccna3':
+            questionTypes = ccna3Types;
+            break;
+        default:
+            questionTypes = ccna1Types;
+    }
+    
+    if (questionTypes.length === 0) {
+        questionTypes = ccna1Types;
+    }
+
     const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
     
     const id = Date.now() + Math.random();
@@ -127,7 +155,7 @@ export function generateRandomQuestion(): SubnettingQuestion {
         case QuestionType.HOW_MANY_SUBNETS:
         case QuestionType.FULL_DETAILS: {
             const firstOctet = Math.floor(Math.random() * 223) + 1;
-            if (firstOctet === 127) { return generateRandomQuestion(); }
+            if (firstOctet === 127) { return generateRandomQuestion(curriculum); }
             const ipAddress = `${firstOctet}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
             const cidr = Math.floor(Math.random() * (30 - 8 + 1)) + 8;
             return { id, type, ipAddress, cidr };
@@ -151,7 +179,7 @@ export function generateRandomQuestion(): SubnettingQuestion {
                 vlsmHostRequirements.push(Math.floor(Math.random() * 100) + 2);
             }
             if (!calculateVlsmLayout(baseNetwork, baseCidr, vlsmHostRequirements)) {
-                return generateRandomQuestion();
+                return generateRandomQuestion(curriculum);
             }
             const vlsmTargetRequirement = vlsmHostRequirements[Math.floor(Math.random() * vlsmHostRequirements.length)];
             return { id, type, baseNetwork, baseCidr, vlsmHostRequirements, vlsmTargetRequirement };
