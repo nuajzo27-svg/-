@@ -1,3 +1,4 @@
+
 export default {
   appTitle: 'Subnetting Trainer',
   appSubtitle: 'Your comprehensive companion for mastering networking & CCNA',
@@ -8,7 +9,7 @@ export default {
   searchResultsTitle: 'Search results for "{query}"',
   navigateToSection: 'Go to Section',
   noResults: 'No matching results found.',
-  footerText: 'Developed by a Network Expert © 2024',
+  footerText: 'Trademark © 2025. Developed by student Aziz',
   function: 'Function',
   info: 'Info',
   example: 'Example',

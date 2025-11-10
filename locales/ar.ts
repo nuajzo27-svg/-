@@ -1,3 +1,4 @@
+
 export default {
   appTitle: 'مدرب تقسيم الشبكات',
   appSubtitle: 'CCNA رفيقك الشامل لإتقان الشبكات ومنهج',
@@ -8,7 +9,7 @@ export default {
   searchResultsTitle: 'نتائج البحث عن "{query}"',
   navigateToSection: 'الانتقال إلى القسم',
   noResults: 'لم يتم العثور على نتائج مطابقة.',
-  footerText: 'تم التطوير بواسطة خبير شبكات © 2024',
+  footerText: 'العلامة التجارية © 2025. تم التطوير من قبل الطالب Aziz',
   function: 'الوظيفة',
   info: 'معلومات',
   example: 'مثال',
@@ -359,31 +360,31 @@ export default {
     },
     tcp: {
         func: 'نقل بيانات موثوق. يضمن الوصول والترتيب (Connection-oriented).',
-        info: 'يستخدم "المصافحة الثلاثية" (SYN, SYN-ACK, ACK) لبدء الاتصال. أبطأ من UDP لكنه أدق.',
+        info: 'يستخدم "المصافحة الثلاثية" (SYN, SYN-ACK, ACK) لبدء الاتصال. أبطأ من UDP ولكنه أدق.',
     },
     udp: {
         func: 'نقل بيانات سريع وغير موثوق (Connectionless). لا يضمن الوصول.',
-        info: 'مناسب للبث المباشر، الصوت (VoIP)، والألعاب أونلاين حيث السرعة أهم من دقة كل بايت.',
+        info: 'مناسب للبث المباشر، VoIP، والألعاب عبر الإنترنت حيث السرعة أهم من دقة كل بايت.',
     },
     ip: {
-        func: 'العنونة المنطقية والتوجيه (Routing) للحزم بين الشبكات المختلفة.',
+        func: 'العنونة المنطقية وتوجيه الحزم (Packets) بين الشبكات المختلفة.',
         info: 'بروتوكول غير متصل (Connectionless) ويعمل بأفضل جهد (Best Effort).',
     },
     icmp: {
-        func: 'إرسال رسائل الأخطاء والتشخيص (مثل Ping و Traceroute).',
-        info: 'يعمل فوق IP مباشرة. لا يستخدم أرقام منافذ.',
+        func: 'إرسال رسائل الخطأ والتشخيص (مثل Ping و Traceroute).',
+        info: 'يعمل مباشرة فوق IP. لا يستخدم أرقام منافذ.',
     },
     nat: {
         func: 'ترجمة عناوين IP الخاصة إلى عامة (والعكس) للوصول للإنترنت.',
-        info: 'يسمح لشبكة كاملة باستخدام عنوان IP عام واحد (عبر PAT).',
+        info: 'يسمح لشبكة كاملة باستخدام عنوان عام واحد (عبر PAT).',
     },
     ipsec: {
         func: 'مجموعة بروتوكولات لتأمين اتصالات IP (تشفير، مصادقة).',
-        info: 'الأساس لشبكات VPN. يستخدم بروتوكولات مثل AH و ESP.',
+        info: 'أساس الشبكات الافتراضية الخاصة (VPN). يستخدم بروتوكولات مثل AH و ESP.',
     },
     ospf: {
         func: 'بروتوكول توجيه ديناميكي داخلي (IGP) من نوع حالة الارتباط (Link-State).',
-        info: 'يستخدم خوارزمية Dijkstra لحساب أقصر مسار. سريع التقارب ويستخدم التكلفة (Cost) كمقياس.',
+        info: 'يستخدم خوارزمية Dijkstra لأقصر مسار. سريع التقارب، يستخدم التكلفة (Cost) كمقياس.',
     },
     eigrp: {
         func: 'بروتوكول توجيه ديناميكي متطور من سيسكو (Advanced Distance Vector).',
@@ -391,359 +392,43 @@ export default {
     },
     rip: {
         func: 'بروتوكول توجيه قديم وبسيط من نوع متجه المسافة (Distance Vector).',
-        info: 'يستخدم عدد القفزات (Hop Count) كمقياس. أقصى حد 15 قفزة.',
+        info: 'يستخدم عدد القفزات (Hop Count) كمقياس. الحد الأقصى 15 قفزة.',
     },
     bgp: {
         func: 'بروتوكول التوجيه الخارجي (EGP) الرئيسي للإنترنت.',
-        info: 'يربط بين الأنظمة المستقلة (AS) المختلفة. بطيء ولكنه مستقر جدًا وقابل للتوسع.',
+        info: 'يربط بين الأنظمة المستقلة (Autonomous Systems) المختلفة. بطيء ولكنه مستقر جدًا وقابل للتوسع.',
     },
     hsrp: {
-        func: 'بروتوكول تكرار البوابة (خاص بسيسكو). يوفر بوابة افتراضية لضمان استمرار الاتصال إذا فشل الراوتر الرئيسي.',
-        info: 'يعمل بانتخاب راوتر نشط (Active) وراوتر احتياطي (Standby).',
+        func: 'بروتوكول تكرار البوابة (خاص بسيسكو). يوفر بوابة افتراضية لضمان الاتصال في حال فشل الموجه الرئيسي.',
+        info: 'يعمل عن طريق انتخاب موجه نشط (Active) وموجه احتياطي (Standby).',
     },
     ethernet: {
         func: 'تقنية الشبكة المحلية (LAN) الأكثر شيوعًا. تحدد العنونة المادية (MAC) والوصول للوسائط.',
-        info: 'تعمل بمعايير IEEE 802.3.',
+        info: 'محددة بمعايير IEEE 802.3.',
     },
     arp: {
-        func: 'الربط بين عنوان IP (المنطقي) وعنوان MAC (المادي).',
-        info: 'يرسل طلب بث "من يملك هذا الـ IP؟" والجهاز المعني يرد بعنوان الـ MAC الخاص به.',
+        func: 'يربط عنوان IP المنطقي بعنوان MAC المادي.',
+        info: 'يرسل طلب بث "من يملك هذا الـ IP؟" ويرد الجهاز المعني بعنوان الـ MAC الخاص به.',
     },
     stp: {
-        func: 'منع حلقات التكرار (Loops) في شبكات المحولات (Switches).',
-        info: 'يقوم بإيقاف بعض المنافذ احتياطيًا لضمان مسار واحد نشط. (IEEE 802.1D/w/s).',
+        func: 'منع الحلقات (Loops) في شبكات المحولات (Switched Networks).',
+        info: 'يقوم بحظر بعض المنافذ بشكل متكرر لضمان مسار نشط واحد فقط. (IEEE 802.1D/w/s).',
     },
     vlan_tagging: {
         func: 'تمييز الإطارات التي تنتمي لشبكات VLAN مختلفة عند مرورها عبر رابط Trunk.',
-        info: 'يضيف "علامة" (Tag) لإطار الإيثرنت تحتوي على رقم الـ VLAN.',
+        info: 'يضيف "علامة" (Tag) لإطار الإيثرنت تحتوي على معرف الـ VLAN.',
     },
     ppp: {
         func: 'بروتوكول للروابط المباشرة (WAN Point-to-Point).',
         info: 'يدعم المصادقة (CHAP/PAP) والضغط، ويعمل على وسائط مختلفة (تسلسلي، ألياف).',
     },
     lacp: {
-        func: 'تجميع عدة روابط مادية في رابط منطقي واحد لزيادة السرعة والتكرار (EtherChannel).',
-        info: 'بروتوكول قياسي (IEEE 802.3ad). البديل الخاص بسيسكو هو PAgP.',
+        func: 'تجميع عدة روابط مادية في رابط منطقي واحد للسرعة والتكرار (EtherChannel).',
+        info: 'بروتوكول قياسي (IEEE 802.3ad). بديل سيسكو هو PAgP.',
     },
     cdp_lldp: {
         func: 'اكتشاف الأجهزة المجاورة المتصلة مباشرة ومعلوماتها الأساسية.',
-        info: 'CDP خاص بسيسكو، و LLDP بروتوكول قياسي مفتوح.',
+        info: 'CDP خاص بسيسكو، LLDP معيار مفتوح.',
     },
-  },
-  ipv6: {
-    title: 'شرح IPv6: مستقبل الإنترنت',
-    becomes: 'يصبح',
-    subnets: 'شبكة فرعية',
-    subnet1: 'الشبكة الفرعية 1',
-    subnet2: 'الشبكة الفرعية 2',
-    subnet3: 'الشبكة الفرعية 3',
-    subnetN: 'الشبكة الفرعية {num}',
-    lastSubnet: 'الشبكة الفرعية الأخيرة',
-    subnetsLookLike: 'كيف تبدو الشبكات الفرعية؟',
-    section1: {
-        title: '1. لماذا نحتاج IPv6؟',
-        p1: 'ببساطة: عناوين IPv4 نفدت! العالم أصبح فيه أجهزة متصلة بالإنترنت أكثر من عدد العناوين المتاحة في الإصدار الرابع (حوالي 4.3 مليار عنوان).',
-        p2: 'IPv6 جاء ليحل هذه المشكلة بتوفير عدد هائل لا يكاد يُحصى من العناوين (340 أ undecillion عنوان! رقم أمامه 36 صفرًا).',
-        feature1_title: 'مساحة عناوين ضخمة', feature1_desc: '128 بت بدلاً من 32 بت.',
-        feature2_title: 'لا حاجة لـ NAT', feature2_desc: 'كل جهاز يمكنه الحصول على عنوان عام حقيقي.',
-        feature3_title: 'إعداد تلقائي أسهل', feature3_desc: 'الأجهزة يمكنها إعطاء نفسها عنوانًا تلقائيًا (SLAAC).',
-        feature4_title: 'رأس حزمة (Header) أبسط', feature4_desc: 'تحسين كفاءة معالجة الموجهات للحزم.',
-    },
-    section2: {
-        title: '2. كيف يبدو عنوان IPv6؟',
-        p1: 'عنوان IPv6 طويل (128 بت)، لذا نكتبه بالنظام السداسي عشري (Hexadecimal) ليكون أقصر قليلاً.',
-        p2: 'يتكون من 8 مجموعات، كل مجموعة فيها 4 أرقام/حروف سداسية عشرية، وتفصل بينها نقطتان رأسيتان (:).',
-        exampleTitle: 'مثال على عنوان كامل:',
-    },
-    section3: {
-        title: '3. قواعد اختصار العنوان (مهم جداً!)',
-        p1: 'لأن العنوان طويل، هناك قاعدتان لتبسيطه:',
-        rule1_title: 'القاعدة 1: حذف الأصفار البادئة',
-        rule1_desc: 'في أي مجموعة، يمكنك حذف الأصفار التي على اليسار فقط.',
-        rule1_example: 'بعد تطبيق القاعدة 1:',
-        rule2_title: 'القاعدة 2: الأصفار المتتالية (::)',
-        rule2_desc: 'يمكنك استبدال مجموعة أو أكثر من المجموعات المتتالية التي تحتوي على أصفار فقط بنقطتين مزدوجتين (::).',
-        rule2_note: 'تحذير: يمكن استخدام (::) مرة واحدة فقط في العنوان!',
-        rule2_example: 'بعد تطبيق القاعدة 2:',
-        finalForm: 'الشكل النهائي المختصر',
-    },
-    section4: {
-        title: '4. أنواع عناوين IPv6 المهمة',
-        p1: 'مثلما يوجد في IPv4 عناوين خاصة وعامة، IPv6 لديه أنواع مخصصة:',
-        gua_desc: 'هو العنوان العام (Public IP) الذي تستخدمه على الإنترنت. يجب أن يكون فريدًا عالميًا. يبدأ عادة بـ 2000::/3 (يعني أول رقم يكون 2 أو 3).',
-        prefix: 'البادئة الشائعة',
-        ula_desc: 'يشبه العناوين الخاصة (Private IP) في IPv4. يستخدم داخل الشبكات المحلية فقط ولا يوجه عبر الإنترنت.',
-        lla_desc: 'عنوان إلزامي لكل واجهة IPv6! يستخدم للتواصل فقط مع الأجهزة المتصلة بنفس الرابط (نفس الكابل أو الشبكة المحلية). الراوترات لا تمرره أبداً.',
-    },
-    section5: {
-        title: '5. تقسيم الشبكات في IPv6 (أسهل مما تتخيل!)',
-        p1: 'التقسيم في IPv6 أبسط بكثير لأننا لا نهتم "بالحفاظ على العناوين". لدينا وفرة!',
-        p2: 'عادةً، يعطيك مزود الخدمة بادئة /48. هذا يترك لك 16 بت كاملة لإنشاء شبكات فرعية.',
-        networkPrefix: 'بادئة التوجيه العالمي', networkPrefix_desc: 'أول 48 بت (يعطيها لك مزود الخدمة).',
-        interfaceId: 'معرف الواجهة (Interface ID)', interfaceId_desc: 'آخر 64 بت (للجهاز نفسه).',
-        scenario_p1: 'تخيل أن شركتك حصلت على البادئة:',
-        scenario_p2: 'الجزء المخصص لك للتقسيم (Subnet ID) هو الـ 16 بت التالية (الرابع مجموعة).',
-        scenario_p3: 'كم شبكة فرعية يمكنك إنشاؤها؟',
-        scenario_p4: 'كل واحدة من هذه الشبكات تتسع لـ 18 كوينتيليون جهاز (/64)!',
-        table: {
-            header1: 'Global Routing Prefix (/48)',
-            header2: 'Subnet ID (16 bit)',
-            header3: 'Interface ID (64 bit)',
-            desc1: 'ثابت من مزود الخدمة',
-            desc2: 'هنا نغير الأرقام لإنشاء شبكات فرعية (من 0000 إلى FFFF)',
-            desc3: 'عنوان الجهاز نفسه',
-        },
-        conclusion: 'التقسيم في IPv6 هو مجرد عد بالنظام السداسي عشري في خانة Subnet ID. لا حاجة لحسابات معقدة للقفزات أو الأقنعة الغريبة!',
-    }
-  },
-  commands: {
-    title: 'قائمة أوامر الشبكات الشائعة',
-    subtitle: 'مرجع سريع لأهم الأوامر التي ستحتاجها في أنظمة التشغيل المختلفة (Windows/Linux) وعلى أجهزة سيسكو (IOS).',
-    setupSteps: 'خطوات الإعداد',
-    exampleOutput: 'مثال للمخرجات',
-    os: {
-        groupTitle: 'أوامر أنظمة التشغيل (Windows / Linux / macOS)',
-        ping: { desc: 'اختبار الاتصال بجهاز آخر عن طريق إرسال رسائل صدى (ICMP Echo). يقيس وقت الاستجابة ويعرفك إذا كان الجهاز البعيد متاحًا.' },
-        tracert: { desc: 'تتبع المسار الذي تسلكه الحزمة للوصول إلى وجهة معينة. يظهر لك كل موجه (Router) تمر به البيانات في طريقها.' },
-        ipconfig: { desc: 'عرض إعدادات الشبكة الحالية لجهازك (عنوان IP، قناع الشبكة، البوابة الافتراضية). في Linux/macOS استخدم `ifconfig` أو `ip a`.' },
-        nslookup: { desc: 'الاستعلام عن نظام أسماء النطاقات (DNS). يعطيك عنوان IP المقابل لاسم موقع (مثل google.com) أو العكس.' },
-    },
-    ios: {
-        groupTitle: 'أوامر أجهزة سيسكو (Cisco IOS)',
-        basic_group: 'الإعدادات الأساسية',
-        router_adv_group: 'إعدادات الراوتر المتقدمة',
-        wan_group: 'تقنيات الشبكات الواسعة (WAN)',
-        nat_group: 'ترجمة عناوين الشبكة (NAT)',
-        routing_group: 'بروتوكولات التوجيه (Routing)',
-        acl_group: 'قوائم التحكم في الوصول (ACLs)',
-        switch_adv_group: 'إعدادات المحول المتقدمة',
-        discovery_group: 'بروتوكولات الاستكشاف',
-        show_group: 'أوامر التحقق والعرض (Show)',
-        helper_group: 'أوامر مساعدة مفيدة',
-
-        first_setup: {
-            title: 'إعداد الراوتر الأولي (First-Time Setup)',
-            desc: 'التسلسل الكامل لأول مرة تقوم فيها بتشغيل موجه جديد: تعيين الاسم، تأمين كلمات المرور، وتفعيل الإدارة.',
-            example: `Router> enable
-Router# configure terminal
-! 1. Set Hostname
-Router(config)# hostname R1
-! 2. Set Enable Secret (encrypted privileged mode password)
-R1(config)# enable secret cisco123
-! 3. Secure Console Line
-R1(config)# line console 0
-R1(config-line)# password conpass
-R1(config-line)# login
-R1(config-line)# exit
-! 4. Secure VTY Lines (Telnet/SSH)
-R1(config)# line vty 0 4
-R1(config-line)# password vtypass
-R1(config-line)# login
-R1(config-line)# exit
-! 5. Encrypt all clear-text passwords
-R1(config)# service password-encryption
-! 6. Set a Warning Banner
-R1(config)# banner motd # Unauthorized access prohibited! #
-! 7. Save Configuration
-R1(config)# end
-R1# copy running-config startup-config`
-        },
-        shared_basic: {
-            title: 'أوامر الإعداد المشتركة (Router & Switch)',
-            desc: 'الأوامر الأساسية التي تستخدم على كل من الموجهات والمحولات لضبط الاسم وكلمات المرور.',
-            example: `hostname Device1
-enable secret class
-line console 0
- password cisco
- login
-service password-encryption`
-        },
-        save_config: {
-            title: 'حفظ الإعدادات',
-            desc: 'حفظ التغييرات من الذاكرة المؤقتة (RAM) إلى الذاكرة الدائمة (NVRAM) لكي لا تفقدها عند إعادة التشغيل.',
-        },
-        router_interfaces: {
-            title: 'إعداد واجهات الراوتر',
-            desc: 'تكوين عنوان IP وتفعيل المنفذ على الراوتر. خطوة ضرورية ليعمل الراوتر.',
-            example: `R1(config)# interface g0/0/1
-R1(config-if)# description Connected to LAN
-R1(config-if)# ip address 192.168.10.1 255.255.255.0
-R1(config-if)# no shutdown`
-        },
-        router_on_stick: {
-            title: 'Router-on-a-Stick (Inter-VLAN)',
-            desc: 'تكوين واجهات فرعية (Subinterfaces) على الراوتر للسماح بالتوجيه بين شبكات VLAN مختلفة.',
-            example: `R1(config)# interface g0/0/1.10
-R1(config-subif)# encapsulation dot1Q 10
-R1(config-subif)# ip address 192.168.10.1 255.255.255.0
-R1(config)# interface g0/0/1.20
-R1(config-subif)# encapsulation dot1Q 20
-R1(config-subif)# ip address 192.168.20.1 255.255.255.0`
-        },
-        ppp_auth: {
-            title: 'إعداد PPP مع مصادقة CHAP',
-            desc: 'تكوين بروتوكول PPP على رابط تسلسلي مع تفعيل المصادقة الآمنة CHAP.',
-            example: `! On Router 1 (R1)
-R1(config)# username R2 password cisco_secure
-R1(config)# interface serial 0/1/0
-R1(config-if)# encapsulation ppp
-R1(config-if)# ppp authentication chap`
-        },
-        frame_relay: {
-            title: 'إعداد Frame Relay (نقطة لنقطة)',
-            desc: 'تكوين اتصال Frame Relay القديم باستخدام واجهات فرعية.',
-            example: `R1(config)# interface serial 0/1/0
-R1(config-if)# encapsulation frame-relay
-R1(config-if)# no shutdown
-R1(config)# interface serial 0/1/0.102 point-to-point
-R1(config-subif)# ip address 10.1.1.1 255.255.255.252
-R1(config-subif)# frame-relay interface-dlci 102`
-        },
-        static_routes: {
-            title: 'المسارات الثابتة (Static Routes)',
-            desc: 'تعريف مسار يدويًا إلى شبكة بعيدة. الصيغة: ip route [الشبكة الوجهة] [القناع] [القفزة التالية أو واجهة الخروج].',
-            example: `! Default route (لأي شبكة غير معروفة)
-R1(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2
-! Specific route (لشبكة محددة)
-R1(config)# ip route 192.168.20.0 255.255.255.0 Serial0/1/0`
-        },
-        ripv2: {
-            title: 'إعداد RIPv2',
-            desc: 'تكوين بروتوكول التوجيه البسيط RIP الإصدار الثاني.',
-            example: `R1(config)# router rip
-R1(config-router)# version 2
-R1(config-router)# no auto-summary
-R1(config-router)# network 192.168.10.0`
-        },
-        ospf: {
-            title: 'إعداد OSPF (منطقة واحدة)',
-            desc: 'تكوين بروتوكول OSPF القوي. يتطلب تحديد معرف العملية (Process ID) والمنطقة (Area).',
-            example: `R1(config)# router ospf 10
-R1(config-router)# router-id 1.1.1.1
-R1(config-router)# network 192.168.10.0 0.0.0.255 area 0
-R1(config-router)# passive-interface g0/0/1`
-        },
-        eigrp: {
-            title: 'إعداد EIGRP',
-            desc: 'تكوين بروتوكول EIGRP الخاص بسيسكو. يجب أن يتطابق رقم النظام المستقل (AS Number) على جميع الموجهات.',
-            example: `R1(config)# router eigrp 100
-R1(config-router)# no auto-summary
-R1(config-router)# network 192.168.10.0
-R1(config-router)# network 10.0.0.0`
-        },
-        std_acl: {
-            desc: 'قائمة تحكم بسيطة تعتمد على عنوان المصدر فقط. الأرقام من 1-99.',
-            example: `! السماح لجهاز واحد فقط ورفض الباقي
-R1(config)# access-list 10 permit host 192.168.10.5
-! تطبيقها على الواجهة (تجاه الخارج)
-R1(config)# interface g0/0/1
-R1(config-if)# ip access-group 10 out`
-        },
-        ext_acl: {
-            desc: 'قائمة تحكم متقدمة تحدد المصدر، الوجهة، البروتوكول، والمنفذ. الأرقام من 100-199.',
-            example: `! السماح بتصفح الويب فقط من شبكة معينة
-R1(config)# access-list 100 permit tcp 192.168.10.0 0.0.0.255 any eq 80
-R1(config)# access-list 100 permit tcp 192.168.10.0 0.0.0.255 any eq 443
-! تطبيقها على الواجهة (تجاه الداخل من الشبكة المحلية)
-R1(config)# interface g0/0/0
-R1(config-if)# ip access-group 100 in`
-        },
-        named_acl: {
-            desc: 'استخدام الأسماء بدلاً من الأرقام للقوائم، وهو أسهل في الإدارة.',
-            example: `R1(config)# ip access-list extended BLOCK_SOCIAL
-R1(config-ext-nacl)# deny tcp any host 10.5.5.5 eq 80
-R1(config-ext-nacl)# permit ip any any`
-        },
-        static_nat: {
-            desc: 'ربط عنوان خاص واحد بعنوان عام واحد بشكل دائم (للخوادم).',
-            example: `R1(config)# ip nat inside source static 192.168.10.10 209.165.200.225
-! لا تنس تحديد الواجهات الداخلية والخارجية
-R1(config)# interface g0/0/0
-R1(config-if)# ip nat inside`
-        },
-        dyn_nat: {
-            desc: 'PAT (Overload): السماح لشبكة كاملة باستخدام عنوان عام واحد للوصول للإنترنت.',
-            example: `! 1. تحديد العناوين المسموح لها بالخروج
-R1(config)# access-list 1 permit 192.168.0.0 0.0.255.255
-! 2. تفعيل PAT على الواجهة الخارجية
-R1(config)# ip nat inside source list 1 interface serial0/1/0 overload`
-        },
-        switch_ip: {
-            title: 'إعداد IP لإدارة المحول (SVI)',
-            desc: 'إعطاء المحول عنوان IP لكي تتمكن من إدارته عن بعد (SSH/Telnet).',
-            example: `SW1(config)# interface vlan 1
-SW1(config-if)# ip address 192.168.1.2 255.255.255.0
-SW1(config-if)# no shutdown
-SW1(config)# ip default-gateway 192.168.1.1`
-        },
-        vlan_trunk: {
-            title: 'إعداد VLAN و Trunk',
-            desc: 'إنشاء شبكات افتراضية (VLANs) وتكوين الروابط بين المحولات لتمريرها (Trunk).',
-            example: `! إنشاء VLAN
-SW1(config)# vlan 10
-SW1(config-vlan)# name Sales
-! تعيين منفذ لـ VLAN
-SW1(config)# interface fa0/5
-SW1(config-if)# switchport mode access
-SW1(config-if)# switchport access vlan 10
-! إعداد منفذ Trunk
-SW1(config)# interface g0/1
-SW1(config-if)# switchport mode trunk`
-        },
-        port_security: {
-            title: 'أمان المنافذ (Port Security)',
-            desc: 'تقييد عدد الأجهزة التي يمكنها الاتصال بمنفذ معين بناءً على عنوان MAC.',
-            example: `SW1(config-if)# switchport mode access
-SW1(config-if)# switchport port-security
-SW1(config-if)# switchport port-security maximum 1
-SW1(config-if)# switchport port-security mac-address sticky
-SW1(config-if)# switchport port-security violation shutdown`
-        },
-        vtp: {
-            title: 'VTP (VLAN Trunking Protocol)',
-            desc: 'بروتوكول لنشر إعدادات VLAN تلقائيًا بين محولات سيسكو. (استخدمه بحذر!)',
-            example: `SW1(config)# vtp domain CCNA_LAB
-SW1(config)# vtp mode server
-SW1(config)# vtp password cisco`
-        },
-        stp_etherchannel: {
-            title: 'STP و EtherChannel',
-            desc: 'تعديل بروتوكول الشجرة الممتدة وتجميع الروابط (LACP).',
-            example: `! جعل هذا المحول هو الجذر لـ VLAN 1
-SW1(config)# spanning-tree vlan 1 root primary
-! تكوين EtherChannel (LACP)
-SW1(config)# interface range fa0/1 - 2
-SW1(config-if-range)# channel-group 1 mode active`
-        },
-        cdp_settings: {
-            title: 'إعدادات CDP/LLDP',
-            desc: 'تفعيل أو تعطيل بروتوكولات استكشاف الجيران.',
-            example: `! تعطيل CDP على جهاز كامل
-R1(config)# no cdp run
-! تفعيل LLDP (البديل القياسي)
-R1(config)# lldp run`
-        },
-        show_general: {
-            title: 'أوامر Show عامة وهامة',
-            desc: 'أوامر لا غنى عنها لمعرفة حالة الجهاز وتشخيص المشاكل.',
-        },
-        show_ip_route: { desc: 'عرض جدول التوجيه. أهم أمر للراوتر.' },
-        show_ospf: { desc: 'التحقق من جيران OSPF وإعداداته.' },
-        show_eigrp: { desc: 'التحقق من جيران EIGRP وجدول الطوبولوجيا.' },
-        show_switch: {
-            title: 'أوامر Show للمحولات',
-            desc: 'للتحقق من VLANs، ومنافذ Trunk، و STP.',
-        },
-        show_mac: { desc: 'عرض جدول عناوين MAC الذي بناه المحول.' },
-        show_cdp: { desc: 'معرفة الأجهزة المتصلة مباشرة (نوعها، اسمها، عناوين IPها).' },
-        show_wan: {
-            desc: 'التحقق من حالة الواجهات التسلسلية وبروتوكولات WAN.',
-            example: `show interfaces serial 0/1/0
-show frame-relay map
-show ppp multilink`
-        },
-        alias: { desc: 'إنشاء اختصارات للأوامر الطويلة لتسريع العمل.' },
-        debug: { desc: 'عرض عمليات الراوتر في الوقت الفعلي. (تحذير: قد يبطئ الجهاز!). استخدم `undebug all` لإيقافه.' },
-    }
   }
 };

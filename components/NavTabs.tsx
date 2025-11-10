@@ -84,12 +84,12 @@ const NavTabs: React.FC<NavTabsProps> = ({ activeSection, setActiveSection }) =>
   }, []);
 
   return (
-    <div ref={navRef} className="flex justify-center border-b border-gray-700 flex-wrap relative">
+    <div ref={navRef} className="flex justify-center border-b border-gray-700 flex-wrap relative z-10">
       {dropdownGroups.map((group) => (
         <div key={group.key} className="relative">
           <button
             onClick={() => handleToggle(group.key)}
-            className={`py-4 px-5 text-base sm:text-lg font-medium transition-colors duration-300 focus:outline-none flex items-center gap-2 ${
+            className={`py-4 px-5 text-base sm:text-lg font-medium transition-colors duration-300 focus:outline-none flex items-center gap-2 whitespace-nowrap ${
               activeGroup === group.key
                 ? 'border-b-2 border-cyan-400 text-cyan-400'
                 : 'text-gray-400 hover:text-white'
@@ -99,14 +99,14 @@ const NavTabs: React.FC<NavTabsProps> = ({ activeSection, setActiveSection }) =>
             <svg className={`w-4 h-4 transition-transform duration-200 ${openDropdown === group.key ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
           </button>
           {openDropdown === group.key && (
-            <div className="absolute top-full mt-1 start-0 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-64 z-30 animate-fade-in-down">
+            <div className="absolute top-full mt-1 start-0 bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-[200px] z-50 animate-fade-in-down">
               <ul className="py-2">
                 {group.items.map(item => (
                   <li key={item.id}>
                     <button
                       onClick={() => handleSelect(item.id)}
-                      className={`w-full text-start px-4 py-2 text-sm transition-colors duration-200 ${
-                        activeSection === item.id ? 'bg-cyan-700 text-white' : 'text-gray-300 hover:bg-gray-700'
+                      className={`w-full text-start px-4 py-3 text-sm transition-colors duration-200 ${
+                        activeSection === item.id ? 'bg-cyan-900/50 text-cyan-400 font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                       }`}
                     >
                       {item.label}
