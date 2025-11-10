@@ -5,9 +5,13 @@ import { generateRandomQuestion, calculateSubnetDetails, calculateCidrForHosts, 
 // --- State Types ---
 type UserSubnettingAnswers = { [K in keyof Omit<SubnettingSolution, 'wildcardMask' | 'totalSubnets'>]?: string; };
 type SubnettingFeedback = { [K in keyof UserSubnettingAnswers]?: boolean; };
+type PracticeMode = 'test' | 'calculator';
 
 const PracticeSection: React.FC = () => {
-    // --- State ---
+    // --- Mode State ---
+    const [practiceMode, setPracticeMode] = useState<PracticeMode>('test');
+
+    // --- Test Mode State ---
     const [question, setQuestion] = useState<SubnettingQuestion | null>(null);
     const [showSolution, setShowSolution] = useState(false);
     const [isAnswered, setIsAnswered] = useState(false);
@@ -36,6 +40,13 @@ const PracticeSection: React.FC = () => {
     const [correctProtocolAnswer, setCorrectProtocolAnswer] = useState<string | null>(null);
     const [userProtocolAnswer, setUserProtocolAnswer] = useState<string | null>(null);
     const [protocolFeedback, setProtocolFeedback] = useState<boolean | undefined>(undefined);
+
+    // --- Calculator Mode State ---
+    const [customIp, setCustomIp] = useState('192.168.1.77');
+    const [customCidr, setCustomCidr] = useState('27');
+    const [customSolution, setCustomSolution] = useState<SubnettingSolution | null>(null);
+    const [customError, setCustomError] = useState<string | null>(null);
+
 
     // --- Effects ---
     useEffect(() => {
@@ -110,7 +121,7 @@ const PracticeSection: React.FC = () => {
         }
     }, []);
 
-    useEffect(() => { newQuestion() }, [newQuestion]);
+    useEffect(() => { if (practiceMode === 'test') newQuestion() }, [newQuestion, practiceMode]);
 
     // --- Handlers ---
     const checkAnswers = () => {
@@ -123,7 +134,10 @@ const PracticeSection: React.FC = () => {
                 if (!subnettingSolution) return;
                 const newFeedback: SubnettingFeedback = {};
                 const keys: (keyof UserSubnettingAnswers)[] = ['networkAddress', 'subnetMask', 'firstUsableHost', 'lastUsableHost', 'broadcastAddress', 'numberOfHosts'];
-                keys.forEach(key => newFeedback[key] = String(userSubnettingAnswers[key] || '').trim().toLowerCase() === String(subnettingSolution[key]).toLowerCase());
+                keys.forEach(key => {
+                    const isCorrect = String(userSubnettingAnswers[key] || '').trim().toLowerCase() === String(subnettingSolution[key]).toLowerCase();
+                    newFeedback[key] = isCorrect;
+                });
                 setSubnettingFeedback(newFeedback);
                 isCorrect = keys.every(key => newFeedback[key]);
                 break;
@@ -167,10 +181,54 @@ const PracticeSection: React.FC = () => {
         localStorage.setItem('subnetting-stats', JSON.stringify(newStats));
     };
 
+    const handleCalculate = () => {
+        const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+        if (!ipRegex.test(customIp.trim())) {
+            setCustomError('الرجاء إدخال عنوان IP صالح.');
+            setCustomSolution(null);
+            return;
+        }
+        const cidrNum = parseInt(customCidr);
+        if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
+            setCustomError('الرجاء إدخال رقم CIDR صالح بين 0 و 32.');
+            setCustomSolution(null);
+            return;
+        }
+        
+        setCustomError(null);
+        const solution = calculateSubnetDetails(customIp.trim(), cidrNum);
+        setCustomSolution(solution);
+    };
+
+
     // --- RENDER FUNCTIONS ---
+    const getDetailedFeedback = (key: keyof SubnettingFeedback): string | null => {
+        if (!isAnswered || subnettingFeedback[key] === true || !subnettingSolution) return null;
+
+        switch(key) {
+            case 'networkAddress': return 'عنوان الشبكة هو أول عنوان في النطاق.';
+            case 'broadcastAddress': return 'عنوان البث هو آخر عنوان في النطاق.';
+            case 'firstUsableHost': return 'أول عنوان صالح هو عنوان الشبكة + 1.';
+            case 'lastUsableHost': return 'آخر عنوان صالح هو عنوان البث - 1.';
+            case 'numberOfHosts': return `تذكر الصيغة: 2^(32-CIDR) - 2.`;
+            case 'subnetMask': return 'تحقق من تحويل CIDR إلى قناع شبكة عشري.';
+            default: return 'الإجابة غير صحيحة.';
+        }
+    }
+
+    const getVlsmFeedback = (key: 'networkAddress' | 'cidr'): string | null => {
+        if (!isAnswered || !vlsmFeedback[key]) return null;
+
+        switch (key) {
+            case 'networkAddress': return 'تذكر أن تبدأ بالمتطلب الأكبر وتخصص الشبكات بالتسلسل.';
+            case 'cidr': return 'تأكد من حساب عدد بتات المضيف الصحيح للمتطلب المحدد.';
+            default: return 'الإجابة غير صحيحة.';
+        }
+    }
+
     
-    const renderFullDetailsQuestion = () => { /* ... (no changes to this function) ... */ 
-         if (!question || !subnettingSolution || !question.ipAddress || typeof question.cidr === 'undefined') return null;
+    const renderFullDetailsQuestion = () => {
+        if (!question || !subnettingSolution || !question.ipAddress || typeof question.cidr === 'undefined') return null;
         
         const inputFields: { key: keyof UserSubnettingAnswers; label: string }[] = [
             { key: 'networkAddress', label: 'عنوان الشبكة' },
@@ -204,6 +262,7 @@ const PracticeSection: React.FC = () => {
                                     'border-gray-600 focus:border-cyan-500 focus:ring-cyan-500/50'
                                 }`}
                             />
+                             {isAnswered && subnettingFeedback[key] === false && <p className="mt-1 text-xs text-red-400">{getDetailedFeedback(key)}</p>}
                              {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{subnettingSolution[key as keyof SubnettingSolution]}</p>}
                         </div>
                     ))}
@@ -211,7 +270,7 @@ const PracticeSection: React.FC = () => {
             </>
         );
     }
-    const renderSingleAnswerQuestion = (questionText: string) => { /* ... (no changes) ... */
+    const renderSingleAnswerQuestion = (questionText: string) => {
         return (
             <div className="max-w-md mx-auto">
                 <div className="bg-gray-900 p-6 rounded-lg mb-6 border border-cyan-500/30">
@@ -233,12 +292,13 @@ const PracticeSection: React.FC = () => {
                         }`}
                         aria-label="إجابة السؤال"
                     />
+                     {isAnswered && singleFeedback === false && question?.type === QuestionType.SCENARIO_CIDR_FOR_HOSTS && <p className="mt-1 text-xs text-red-400 text-center">تذكر الصيغة: 2^H - 2 &gt;= عدد الأجهزة.</p>}
                      {showSolution && <p className="mt-2 text-lg text-center text-green-400 font-mono">{correctSingleAnswer}</p>}
                 </div>
             </div>
         );
     }
-    const renderVlsmQuestion = () => { /* ... (no changes) ... */
+    const renderVlsmQuestion = () => {
          if (!question || !question.baseNetwork || typeof question.baseCidr === 'undefined' || !question.vlsmHostRequirements || typeof question.vlsmTargetRequirement === 'undefined') return null;
 
         return (
@@ -276,6 +336,7 @@ const PracticeSection: React.FC = () => {
                                 'border-gray-600 focus:border-cyan-500 focus:ring-cyan-500/50'
                             }`}
                         />
+                         {isAnswered && vlsmFeedback.networkAddress === false && <p className="mt-1 text-xs text-red-400">{getVlsmFeedback('networkAddress')}</p>}
                          {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{vlsmCorrectAnswer.networkAddress}</p>}
                     </div>
                      <div>
@@ -293,6 +354,7 @@ const PracticeSection: React.FC = () => {
                                 'border-gray-600 focus:border-cyan-500 focus:ring-cyan-500/50'
                             }`}
                         />
+                        {isAnswered && vlsmFeedback.cidr === false && <p className="mt-1 text-xs text-red-400">{getVlsmFeedback('cidr')}</p>}
                          {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{vlsmCorrectAnswer.cidr}</p>}
                     </div>
                 </div>
@@ -330,6 +392,7 @@ const PracticeSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
+                {isAnswered && aclFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">تذكر أن القواعد تعالج بالترتيب وتتوقف عند أول تطابق.</p>}
                 {showSolution && <p className="mt-4 text-lg text-center font-bold" style={{color: correctAclAnswer === 'Permit' ? '#4ade80' : '#f87171'}}>الحل الصحيح: {correctAclAnswer === 'Permit' ? 'السماح' : 'الرفض'}</p>}
             </div>
         );
@@ -362,6 +425,7 @@ const PracticeSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
+                 {isAnswered && stpFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">يتم انتخاب الجسر الجذري بناءً على أقل أولوية، ثم أقل عنوان MAC في حالة التعادل.</p>}
                 {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctStpAnswer}</p>}
             </div>
         );
@@ -383,46 +447,135 @@ const PracticeSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
+                {isAnswered && protocolFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">الإجابة الصحيحة هي: {correctProtocolAnswer}</p>}
                  {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctProtocolAnswer}</p>}
             </div>
         );
     };
 
-    const renderQuestion = () => {
-        if (!question) return null;
-        switch (question.type) {
-            case QuestionType.FULL_DETAILS: return renderFullDetailsQuestion();
-            case QuestionType.HOW_MANY_SUBNETS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الشبكات الفرعية التي يمكن إنشاؤها؟`);
-            case QuestionType.HOW_MANY_HOSTS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الأجهزة الصالحة للاستخدام في كل شبكة فرعية؟`);
-            case QuestionType.SCENARIO_CIDR_FOR_HOSTS: return renderSingleAnswerQuestion(`شركة تحتاج إلى شبكة تتسع لـ ${question.requiredHosts} موظفًا. ما هو أفضل وأكفأ قناع شبكة بصيغة CIDR (مثال: /26) يمكن استخدامه؟`);
-            case QuestionType.VLSM_SCENARIO: return renderVlsmQuestion();
-            case QuestionType.ACL_EVALUATION: return renderAclQuestion();
-            case QuestionType.STP_ROOT_BRIDGE: return renderStpQuestion();
-            case QuestionType.PROTOCOL_IDENTIFICATION: return renderProtocolIdQuestion();
-            default: return <p>حدث خطأ غير متوقع.</p>;
+    const renderTestMode = () => {
+        if (!question) {
+            return <div className="text-center p-8">جاري تحميل السؤال...</div>;
         }
+        return (
+            <div>
+                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">اختبر معلوماتك</h2>
+                <div className="max-w-md mx-auto bg-gray-900/50 rounded-lg p-3 mb-6 flex justify-around items-center">
+                    <div className="text-center"><span className="text-sm text-gray-400">صحيحة</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
+                    <div className="text-center"><span className="text-sm text-gray-400">خاطئة</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
+                    <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">تصفير</button>
+                </div>
+                
+                <div className="min-h-[300px] flex flex-col justify-center">
+                    {
+                        (() => {
+                            if (!question) return null;
+                            switch (question.type) {
+                                case QuestionType.FULL_DETAILS: return renderFullDetailsQuestion();
+                                case QuestionType.HOW_MANY_SUBNETS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الشبكات الفرعية التي يمكن إنشاؤها؟`);
+                                case QuestionType.HOW_MANY_HOSTS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الأجهزة الصالحة للاستخدام في كل شبكة فرعية؟`);
+                                case QuestionType.SCENARIO_CIDR_FOR_HOSTS: return renderSingleAnswerQuestion(`شركة تحتاج إلى شبكة تتسع لـ ${question.requiredHosts} موظفًا. ما هو أفضل وأكفأ قناع شبكة بصيغة CIDR (مثال: /26) يمكن استخدامه؟`);
+                                case QuestionType.VLSM_SCENARIO: return renderVlsmQuestion();
+                                case QuestionType.ACL_EVALUATION: return renderAclQuestion();
+                                case QuestionType.STP_ROOT_BRIDGE: return renderStpQuestion();
+                                case QuestionType.PROTOCOL_IDENTIFICATION: return renderProtocolIdQuestion();
+                                default: return <p>حدث خطأ غير متوقع.</p>;
+                            }
+                        })()
+                    }
+                </div>
+                
+                <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                     <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">تحقق من الإجابة</button>
+                    <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? 'إخفاء الحل' : 'أظهر الحل'}</button>
+                    <button onClick={newQuestion} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
+                </div>
+            </div>
+        )
     }
 
-    if (!question) {
-        return <div className="text-center p-8">جاري تحميل السؤال...</div>;
-    }
+    const renderCalculatorMode = () => {
+        const solutionEntries = customSolution ? [
+            { label: 'عنوان الشبكة', value: customSolution.networkAddress },
+            { label: 'قناع الشبكة', value: customSolution.subnetMask },
+            { label: 'عنوان البث', value: customSolution.broadcastAddress },
+            { label: 'CIDR', value: `/${customCidr}` },
+            { label: 'قناع الوايلد كارد', value: customSolution.wildcardMask },
+            { label: 'عدد الأجهزة المتاحة', value: customSolution.numberOfHosts },
+            { label: 'أول IP صالح', value: customSolution.firstUsableHost },
+            { label: 'آخر IP صالح', value: customSolution.lastUsableHost },
+        ] : [];
+
+        return (
+            <div>
+                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">حاسبة الشبكات الفرعية</h2>
+                <p className="text-center text-gray-400 mb-8">أدخل عنوان IP و CIDR لحساب تفاصيل الشبكة الفرعية.</p>
+                
+                <div className="max-w-xl mx-auto bg-gray-900/50 p-6 rounded-lg">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                        <input
+                            type="text"
+                            value={customIp}
+                            onChange={(e) => setCustomIp(e.target.value)}
+                            placeholder="192.168.1.1"
+                            className="flex-grow w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:border-cyan-500 focus:ring-cyan-500/50 font-mono text-lg"
+                        />
+                        <span className="text-2xl text-gray-400 font-sans">/</span>
+                        <input
+                            type="number"
+                            value={customCidr}
+                            onChange={(e) => setCustomCidr(e.target.value)}
+                            placeholder="24"
+                            className="w-full sm:w-24 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:border-cyan-500 focus:ring-cyan-500/50 font-mono text-lg text-center"
+                            min="0"
+                            max="32"
+                        />
+                    </div>
+                    <button onClick={handleCalculate} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                        احسب
+                    </button>
+                </div>
+
+                {customError && <p className="text-red-400 text-center mt-4 bg-red-500/10 p-3 rounded-lg max-w-xl mx-auto">{customError}</p>}
+
+                {customSolution && (
+                    <div className="mt-8 max-w-3xl mx-auto animate-fade-in">
+                        <h3 className="text-2xl font-semibold text-white mb-4 text-center">النتائج لـ <span className="text-yellow-400 font-mono">{customIp}/{customCidr}</span></h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900 p-6 rounded-lg">
+                            {solutionEntries.map(entry => (
+                                <div key={entry.label} className="bg-gray-800 p-3 rounded-md">
+                                    <span className="text-gray-400 text-sm">{entry.label}:</span>
+                                    <p className="text-yellow-400 font-mono text-lg break-words">{String(entry.value)}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div>
-            <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">اختبر معلوماتك</h2>
-            <div className="max-w-md mx-auto bg-gray-900/50 rounded-lg p-3 mb-6 flex justify-around items-center">
-                <div className="text-center"><span className="text-sm text-gray-400">صحيحة</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
-                <div className="text-center"><span className="text-sm text-gray-400">خاطئة</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
-                <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">تصفير</button>
+             <div className="flex justify-center border-b border-gray-700 mb-8">
+                <button
+                    onClick={() => setPracticeMode('test')}
+                    className={`py-3 px-6 text-lg font-medium transition-colors duration-300 focus:outline-none ${
+                        practiceMode === 'test' ? 'border-b-2 border-cyan-400 text-cyan-400' : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    اختبر معلوماتك
+                </button>
+                 <button
+                    onClick={() => setPracticeMode('calculator')}
+                    className={`py-3 px-6 text-lg font-medium transition-colors duration-300 focus:outline-none ${
+                        practiceMode === 'calculator' ? 'border-b-2 border-cyan-400 text-cyan-400' : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    حاسبة الشبكات
+                </button>
             </div>
-            
-            <div className="min-h-[300px] flex flex-col justify-center">{renderQuestion()}</div>
-            
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                 <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">تحقق من الإجابة</button>
-                <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? 'إخفاء الحل' : 'أظهر الحل'}</button>
-                <button onClick={newQuestion} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
-            </div>
+            {practiceMode === 'test' ? renderTestMode() : renderCalculatorMode()}
         </div>
     );
 };
