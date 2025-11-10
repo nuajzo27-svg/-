@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import InteractiveTopology from './InteractiveTopology';
+import { TopologyNode, TopologyLink } from '../types';
 
 interface AccordionItemProps {
   title: string;
@@ -271,6 +273,50 @@ L3_Switch(config-if)# switchport access vlan 10`}
     </>
 );
 
+const stpNodes: TopologyNode[] = [
+    { id: 'SW1', label: 'SW1', x: 200, y: 50, details: 
+        <div className="font-mono text-xs">
+            <p className="text-green-400 font-bold">[ROOT BRIDGE]</p>
+            <p><span className="text-gray-400">Priority:</span> 24576</p>
+            <p><span className="text-gray-400">MAC:</span> AAAA.AAAA.AAAA</p>
+        </div> 
+    },
+    { id: 'SW2', label: 'SW2', x: 100, y: 200, details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">Priority:</span> 32768</p>
+            <p><span className="text-gray-400">MAC:</span> BBBB.BBBB.BBBB</p>
+        </div> 
+    },
+    { id: 'SW3', label: 'SW3', x: 300, y: 200, details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">Priority:</span> 32768</p>
+            <p><span className="text-gray-400">MAC:</span> CCCC.CCCC.CCCC</p>
+        </div> 
+    },
+];
+
+const stpLinks: TopologyLink[] = [
+    { id: '1-2', source: 'SW1', target: 'SW2', details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">SW1 Port:</span> <span className="text-green-400">Designated</span></p>
+            <p><span className="text-gray-400">SW2 Port:</span> <span className="text-blue-400">Root</span></p>
+        </div>
+    },
+    { id: '1-3', source: 'SW1', target: 'SW3', details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">SW1 Port:</span> <span className="text-green-400">Designated</span></p>
+            <p><span className="text-gray-400">SW3 Port:</span> <span className="text-blue-400">Root</span></p>
+        </div>
+    },
+    { id: '2-3', source: 'SW2', target: 'SW3', isBlocked: true, details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">SW2 Port:</span> <span className="text-green-400">Designated</span></p>
+            <p><span className="text-gray-400">SW3 Port:</span> <span className="text-red-400">Alternate (Blocked)</span></p>
+            <p className="text-gray-500 mt-2 text-wrap">This port is blocked by STP to prevent a loop.</p>
+        </div>
+    },
+];
+
 const Chapter4: React.FC = () => (
     <>
         <section>
@@ -295,6 +341,7 @@ const Chapter4: React.FC = () => (
 
         <section>
             <h4 className="text-2xl font-bold text-white mb-3">آلية عمل STP</h4>
+            <InteractiveTopology nodes={stpNodes} links={stpLinks} title="مخطط STP التفاعلي" />
             <p>يعمل STP عن طريق عملية من ثلاث خطوات لإنشاء طوبولوجيا خالية من الحلقات:</p>
             <ol className="list-decimal list-inside space-y-3 bg-gray-900 p-4 rounded-md">
                 <li><strong className="text-yellow-400">انتخاب الجسر الجذري (Root Bridge):</strong> يتم انتخاب محول واحد في الشبكة ليكون "الجسر الجذري". يتم انتخاب المحول صاحب <strong className="text-cyan-400">أقل معرف جسر (Bridge ID)</strong>. معرف الجسر يتكون من (أولوية + عنوان MAC).</li>

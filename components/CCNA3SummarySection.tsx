@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import InteractiveTopology from './InteractiveTopology';
+import { TopologyNode, TopologyLink } from '../types';
 
 interface AccordionItemProps {
   title: string;
@@ -98,6 +100,47 @@ const Chapter1: React.FC = () => (
     </>
 );
 
+const ospfNodes: TopologyNode[] = [
+    { id: 'R1', label: 'R1', x: 100, y: 125, details: 
+        <div className="font-mono text-xs text-white">
+            <pre className="bg-black p-2 rounded-md">
+                <code>
+{`O 192.168.2.0/24 [110/2]
+   via 10.1.1.2, S0/0/0
+C 192.168.1.0/24 is ...
+L 192.168.1.1/32 is ...
+C 10.1.1.0/30 is ...
+L 10.1.1.1/32 is ...`}
+                </code>
+            </pre>
+        </div> 
+    },
+    { id: 'R2', label: 'R2', x: 300, y: 125, details: 
+        <div className="font-mono text-xs text-white">
+            <pre className="bg-black p-2 rounded-md">
+                <code>
+{`O 192.168.1.0/24 [110/2]
+   via 10.1.1.1, S0/0/0
+C 192.168.2.0/24 is ...
+L 192.168.2.1/32 is ...
+C 10.1.1.0/30 is ...
+L 10.1.1.2/32 is ...`}
+                </code>
+            </pre>
+        </div> 
+    },
+];
+
+const ospfLinks: TopologyLink[] = [
+    { id: '1-2', source: 'R1', target: 'R2', label: '10.1.1.0/30', details: 
+        <div className="font-mono text-xs">
+            <p><span className="text-gray-400">Network:</span> 10.1.1.0/30</p>
+            <p><span className="text-gray-400">Area:</span> 0</p>
+        </div>
+    },
+];
+
+
 const Chapter2: React.FC = () => (
     <>
         <section>
@@ -156,6 +199,7 @@ R1(config-if)# ip ospf cost 1562`}
 
         <section>
             <h4 className="text-2xl font-bold text-white mb-3">التحقق من OSPF</h4>
+            <InteractiveTopology nodes={ospfNodes} links={ospfLinks} title="مخطط OSPF التفاعلي" />
              <ul className="list-disc list-inside space-y-2">
                 <li><code className="text-yellow-400 font-mono">show ip ospf neighbor</code>: يعرض جيران OSPF وحالة علاقة الجوار (يجب أن تكون FULL).</li>
                 <li><code className="text-yellow-400 font-mono">show ip protocols</code>: يعرض معلومات حول بروتوكولات التوجيه التي تعمل على الموجه.</li>

@@ -1,3 +1,6 @@
+// FIX: Import React to provide types for React.ReactNode used in TopologyNode and TopologyLink interfaces.
+import React from 'react';
+
 export enum AppSection {
   Learn = 'learn',
   Practice = 'practice',
@@ -80,4 +83,22 @@ export interface SearchableItem {
 export interface SearchResult {
     item: SearchableItem;
     snippet: string; 
+}
+
+// --- Interactive Topology Interfaces ---
+export interface TopologyNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  details?: React.ReactNode;
+}
+
+export interface TopologyLink {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  details?: React.ReactNode;
+  isBlocked?: boolean;
 }
