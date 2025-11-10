@@ -5,6 +5,7 @@ export enum AppSection {
   Protocols = 'protocols',
   IPv6 = 'ipv6',
   Commands = 'commands',
+  CCNA_SUMMARY = 'ccna_summary',
 }
 
 export enum QuestionType {

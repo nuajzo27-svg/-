@@ -7,6 +7,7 @@ import TricksSection from './components/TricksSection';
 import ProtocolsSection from './components/ProtocolsSection';
 import IPv6Section from './components/IPv6Section';
 import CommandsSection from './components/CommandsSection';
+import CCNA1SummarySection from './components/CCNA1SummarySection';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AppSection>(AppSection.Learn);
@@ -23,6 +24,8 @@ const App: React.FC = () => {
         return <IPv6Section />;
       case AppSection.Commands:
         return <CommandsSection />;
+      case AppSection.CCNA_SUMMARY:
+        return <CCNA1SummarySection />;
       case AppSection.Learn:
       default:
         return <LearnSection />;

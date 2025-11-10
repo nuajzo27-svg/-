@@ -103,6 +103,7 @@ export function generateRandomQuestion(): SubnettingQuestion {
         QuestionType.HOW_MANY_SUBNETS,
         QuestionType.SCENARIO_CIDR_FOR_HOSTS,
         QuestionType.VLSM_SCENARIO,
+        QuestionType.VLSM_SCENARIO, // Weight VLSM more heavily
     ];
     const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
     
@@ -112,55 +113,67 @@ export function generateRandomQuestion(): SubnettingQuestion {
         case QuestionType.HOW_MANY_HOSTS:
         case QuestionType.HOW_MANY_SUBNETS:
         case QuestionType.FULL_DETAILS: {
-            const classType = Math.floor(Math.random() * 3);
-            let ipAddress: string;
-            let cidr: number;
+            // Generate more varied and realistic public/private IP scenarios
+            const firstOctet = Math.floor(Math.random() * 223) + 1; // 1-223, avoiding 0.x, loopback, multicast
+            if (firstOctet === 127) { return generateRandomQuestion(); } // Avoid loopback, regenerate
+
+            const ipAddress = `${firstOctet}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
             
-            if (classType === 0) { // Class A private
-                ipAddress = `10.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-                cidr = Math.floor(Math.random() * (30 - 9 + 1)) + 9; // /9 to /30
-            } else if (classType === 1) { // Class B private
-                 ipAddress = `172.${Math.floor(Math.random() * 16) + 16}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-                 cidr = Math.floor(Math.random() * (30 - 17 + 1)) + 17; // /17 to /30
-            } else { // Class C private
-                ipAddress = `192.168.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-                cidr = Math.floor(Math.random() * (30 - 25 + 1)) + 25; // /25 to /30
-            }
+            // Generate a wider, more challenging range of CIDRs, not tied to classful assumptions
+            const cidr = Math.floor(Math.random() * (30 - 8 + 1)) + 8; // /8 to /30
+            
             return { id, type, ipAddress, cidr };
         }
         case QuestionType.SCENARIO_CIDR_FOR_HOSTS: {
-            const requiredHosts = Math.floor(Math.random() * 500) + 5;
+            // Increase the complexity by asking for a much larger range of hosts
+            const requiredHosts = Math.floor(Math.random() * 10000) + 5; // 5 to 10,005 hosts
             return { id, type, requiredHosts };
         }
         case QuestionType.VLSM_SCENARIO: {
-            const baseCidr = 24;
-            const baseNetwork = `192.168.${Math.floor(Math.random() * 256)}.0`;
-
-            const reqs = new Set<number>();
-            while(reqs.size < 3) {
-                if (reqs.size === 0) reqs.add(Math.floor(Math.random() * 40) + 20); // 20-60 hosts
-                if (reqs.size === 1) reqs.add(Math.floor(Math.random() * 8) + 5);   // 5-13 hosts
-                if (reqs.size === 2) reqs.add(2);
+            // 1. Generate a more varied base network
+            const baseCidrOptions = [16, 20, 21, 22, 23, 24];
+            const baseCidr = baseCidrOptions[Math.floor(Math.random() * baseCidrOptions.length)];
+            
+            // Generate a base network address that aligns with the CIDR boundary
+            let baseNetworkLong = ipToLong(`172.${16 + Math.floor(Math.random()*16)}.0.0`);
+            if (baseCidr >= 24) {
+                 baseNetworkLong = ipToLong(`192.168.${Math.floor(Math.random() * 256)}.0`);
             }
-            const vlsmHostRequirements = Array.from(reqs);
+            const mask = (0xffffffff << (32 - baseCidr)) >>> 0;
+            const baseNetwork = longToIp(baseNetworkLong & mask);
 
-            // Shuffle to make it non-obvious which order to solve in
-             for (let i = vlsmHostRequirements.length - 1; i > 0; i--) {
+            // 2. Generate a more varied number and size of requirements
+            const numRequirements = Math.floor(Math.random() * 3) + 3; // 3 to 5 requirements
+            const vlsmHostRequirements: number[] = [];
+            for (let i = 0; i < numRequirements; i++) {
+                const sizeProfile = Math.random();
+                if (sizeProfile > 0.9 && i === 0) { // Very large requirement (rare, and only as the first one)
+                    vlsmHostRequirements.push(Math.floor(Math.random() * 750) + 250); // 250-1000
+                } else if (sizeProfile > 0.6) { // Medium
+                    vlsmHostRequirements.push(Math.floor(Math.random() * 100) + 20); // 20-120
+                } else if (sizeProfile > 0.2) { // Small
+                    vlsmHostRequirements.push(Math.floor(Math.random() * 15) + 5); // 5-20
+                } else { // Point-to-point
+                    vlsmHostRequirements.push(2);
+                }
+            }
+            
+            // 3. Ensure the scenario is solvable, regenerate if not
+            if (!calculateVlsmLayout(baseNetwork, baseCidr, vlsmHostRequirements)) {
+                return generateRandomQuestion(); // Try again with a new question
+            }
+
+            // 4. Shuffle requirements and pick a target
+            for (let i = vlsmHostRequirements.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [vlsmHostRequirements[i], vlsmHostRequirements[j]] = [vlsmHostRequirements[j], vlsmHostRequirements[i]];
             }
-            
             const vlsmTargetRequirement = vlsmHostRequirements[Math.floor(Math.random() * vlsmHostRequirements.length)];
-
-            // Verify a solution is possible
-            if (!calculateVlsmLayout(baseNetwork, baseCidr, vlsmHostRequirements)) {
-                // If impossible, generate a simpler question instead
-                return generateRandomQuestion();
-            }
             
             return { id, type, baseNetwork, baseCidr, vlsmHostRequirements, vlsmTargetRequirement };
         }
         default: {
+            // Fallback, should not be reached
             const ipAddress = `192.168.1.1`;
             const cidr = 26;
             return { id, type: QuestionType.FULL_DETAILS, ipAddress, cidr };
