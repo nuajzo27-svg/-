@@ -97,11 +97,11 @@ export function calculateVlsmLayout(baseIp: string, baseCidr: number, requiremen
 // --- Data for new question types ---
 
 const protocolQuestions = [
-    { text: 'ما هو البروتوكول الذي يُستخدم لترجمة أسماء النطاقات (مثل google.com) إلى عناوين IP؟', options: ['DNS', 'DHCP', 'HTTP', 'FTP'], answer: 'DNS' },
-    { text: 'أي بروتوكول يوفر اتصالاً موثوقًا وموجهًا بالاتصال (Connection-Oriented)؟', options: ['TCP', 'UDP', 'IP', 'ICMP'], answer: 'TCP' },
-    { text: 'ما هو البروتوكول المسؤول عن تعيين عناوين IP للأجهزة تلقائيًا في الشبكة؟', options: ['DHCP', 'ARP', 'DNS', 'SMTP'], answer: 'DHCP' },
-    { text: 'أي بروتوكول يُستخدم لإرسال رسائل التشخيص والأخطاء، وهو أساس أداة `ping`؟', options: ['ICMP', 'IGMP', 'SNMP', 'TCP'], answer: 'ICMP' },
-    { text: 'ما هو البروتوكول الذي يربط عنوان IP (الطبقة 3) بعنوان MAC (الطبقة 2) داخل الشبكة المحلية؟', options: ['ARP', 'RARP', 'IP', 'Ethernet'], answer: 'ARP' },
+    { key: 'dns', options: ['DNS', 'DHCP', 'HTTP', 'FTP'], answer: 'DNS' },
+    { key: 'tcp', options: ['TCP', 'UDP', 'IP', 'ICMP'], answer: 'TCP' },
+    { key: 'dhcp', options: ['DHCP', 'ARP', 'DNS', 'SMTP'], answer: 'DHCP' },
+    { key: 'icmp', options: ['ICMP', 'IGMP', 'SNMP', 'TCP'], answer: 'ICMP' },
+    { key: 'arp', options: ['ARP', 'RARP', 'IP', 'Ethernet'], answer: 'ARP' },
 ];
 
 function generateRandomMac() {
@@ -217,7 +217,7 @@ export function generateRandomQuestion(curriculum: CurriculumLevel): SubnettingQ
              const protoQ = protocolQuestions[Math.floor(Math.random() * protocolQuestions.length)];
              // Shuffle options
              const options = [...protoQ.options].sort(() => Math.random() - 0.5);
-             return { id, type, protocol: { text: protoQ.text, options } };
+             return { id, type, protocol: { text: `practice.protocolQuestions.${protoQ.key}`, options } };
         }
         default: {
             const ipAddress = `192.168.1.1`;
@@ -268,6 +268,7 @@ export function findStpRootBridge(switches: SubnettingQuestion['stp']['switches'
     return rootBridge.name;
 }
 
-export function getProtocolAnswer(questionText: string): string | undefined {
-    return protocolQuestions.find(q => q.text === questionText)?.answer;
+export function getProtocolAnswer(questionKey: string): string | undefined {
+    const key = questionKey.split('.').pop();
+    return protocolQuestions.find(q => q.key === key)?.answer;
 }

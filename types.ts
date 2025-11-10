@@ -31,7 +31,7 @@ export enum QuestionType {
   PROTOCOL_IDENTIFICATION,
 }
 
-// Renamed in spirit to PracticeQuestion, but keeping original name for minimal changes.
+// Represents a question in the Practice section
 export interface SubnettingQuestion {
   id: number;
   type: QuestionType;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TopologyNode, TopologyLink } from '../types';
+import { useI18n } from '../hooks/useI18n';
 
 interface InteractiveTopologyProps {
   nodes: TopologyNode[];
@@ -8,6 +9,7 @@ interface InteractiveTopologyProps {
 }
 
 const InteractiveTopology: React.FC<InteractiveTopologyProps> = ({ nodes, links, title }) => {
+  const { t } = useI18n();
   const [selectedItem, setSelectedItem] = useState<TopologyNode | TopologyLink | null>(null);
 
   const getNodeById = (id: string) => nodes.find(n => n.id === id);
@@ -57,7 +59,7 @@ const InteractiveTopology: React.FC<InteractiveTopologyProps> = ({ nodes, links,
           </svg>
         </div>
         <div className="w-full md:w-1/3 bg-gray-900 p-4 rounded-md">
-          <h5 className="font-bold text-lg text-cyan-400 mb-2 border-b border-gray-700 pb-2">التفاصيل</h5>
+          <h5 className="font-bold text-lg text-cyan-400 mb-2 border-b border-gray-700 pb-2">{t('info')}</h5>
           {selectedItem ? (
             <div className="text-sm space-y-2 animate-fade-in">
                 <h6 className="font-bold text-white">{selectedItem.label || `Link ${selectedItem.id}`}</h6>

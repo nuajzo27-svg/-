@@ -1,4 +1,5 @@
 import React from 'react';
+import { useI18n } from '../hooks/useI18n';
 
 interface ProtocolCardProps {
   name: string;
@@ -21,143 +22,77 @@ const ProtocolCard: React.FC<ProtocolCardProps> = ({ name, layer, layerColor, ch
   </div>
 );
 
-const protocols = [
-  {
-    name: 'HTTP',
-    layer: 'Application Layer',
-    layerColor: 'bg-blue-900 text-blue-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول نقل النص التشعبي. هو الأساس الذي بنيت عليه شبكة الويب العالمية (WWW) لنقل صفحات الويب.</p>
-        <p><strong>أين يستخدم:</strong> عند تصفحك لأي موقع ويب غير مشفر (يبدأ بـ http://).</p>
-        <p><strong>كيفية التفعيل:</strong> يعمل تلقائيًا في متصفحات الويب عند طلب موقع. المنفذ الافتراضي له هو 80.</p>
-      </>
-    ),
-  },
-  {
-    name: 'HTTPS',
-    layer: 'Application Layer',
-    layerColor: 'bg-blue-900 text-blue-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> النسخة الآمنة من HTTP. يقوم بتشفير البيانات بين المتصفح والخادم لحماية المعلومات الحساسة مثل كلمات المرور.</p>
-        <p><strong>أين يستخدم:</strong> في كل المواقع الحديثة التي تتطلب تسجيل دخول أو معاملات مالية (يبدأ بـ https://).</p>
-        <p><strong>كيفية التفعيل:</strong> يتطلب شهادة SSL/TLS مثبتة على خادم الويب. المنفذ الافتراضي له هو 443.</p>
-      </>
-    ),
-  },
-  {
-    name: 'DNS',
-    layer: 'Application Layer',
-    layerColor: 'bg-blue-900 text-blue-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> نظام أسماء النطاقات. يعمل مثل "دليل الهاتف" للإنترنت، حيث يقوم بترجمة أسماء النطاقات (مثل google.com) إلى عناوين IP المقابلة لها.</p>
-        <p><strong>أين يستخدم:</strong> في كل مرة تكتب فيها اسم موقع في المتصفح.</p>
-        <p><strong>كيفية التفعيل:</strong> يتم تكوين عنوان خادم DNS في إعدادات الشبكة على جهازك أو الراوتر (غالبًا ما يتم تلقائيًا من مزود الخدمة).</p>
-      </>
-    ),
-  },
-   {
-    name: 'DHCP',
-    layer: 'Application Layer',
-    layerColor: 'bg-blue-900 text-blue-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول التكوين الديناميكي للمضيفين. يقوم بتعيين عناوين IP وإعدادات الشبكة الأخرى (مثل قناع الشبكة والبوابة) للأجهزة تلقائيًا عند اتصالها بالشبكة.</p>
-        <p><strong>أين يستخدم:</strong> في معظم الشبكات المنزلية والمكتبية لتسهيل إضافة الأجهزة.</p>
-        <p><strong>كيفية التفعيل:</strong> يتم تفعيله كخدمة (Server) على الراوتر أو خادم مخصص، وتكون الأجهزة مهيأة كـ (Clients) لطلب عنوان IP تلقائيًا.</p>
-      </>
-    ),
-  },
-  {
-    name: 'TCP',
-    layer: 'Transport Layer',
-    layerColor: 'bg-orange-900 text-orange-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول التحكم في الإرسال. يوفر نقلًا موثوقًا للبيانات، ويتأكد من وصول جميع الحزم بالترتيب الصحيح وبدون أخطاء (Connection-Oriented).</p>
-        <p><strong>أين يستخدم:</strong> في التطبيقات التي تتطلب موثوقية عالية مثل تصفح الويب، البريد الإلكتروني، ونقل الملفات.</p>
-        <p><strong>كيفية التفعيل:</strong> يتم اختياره من قبل مطوري التطبيقات عند الحاجة إلى اتصال موثوق. يعمل في الخلفية.</p>
-      </>
-    ),
-  },
-  {
-    name: 'UDP',
-    layer: 'Transport Layer',
-    layerColor: 'bg-orange-900 text-orange-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول بيانات المستخدم. يوفر نقلًا سريعًا جدًا للبيانات ولكنه غير موثوق (Connectionless). لا يضمن وصول الحزم أو ترتيبها.</p>
-        <p><strong>أين يستخدم:</strong> في التطبيقات التي تكون فيها السرعة أهم من الدقة، مثل بث الفيديو المباشر، الألعاب عبر الإنترنت، والمكالمات الصوتية (VoIP).</p>
-        <p><strong>كيفية التفعيل:</strong> يتم اختياره من قبل مطوري التطبيقات عند الحاجة إلى سرعة عالية وزمن وصول منخفض.</p>
-      </>
-    ),
-  },
-  {
-    name: 'IP',
-    layer: 'Network Layer',
-    layerColor: 'bg-green-900 text-green-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول الإنترنت. هو المسؤول عن العنصر الأساسي في الشبكات: العنونة المنطقية (Logical Addressing) وتوجيه الحزم (Routing) من المصدر إلى الوجهة عبر شبكات متعددة.</p>
-        <p><strong>أين يستخدم:</strong> هو أساس كل اتصال على الإنترنت. كل جهاز متصل بالشبكة لديه عنوان IP.</p>
-        <p><strong>كيفية التفعيل:</strong> يعمل بشكل أساسي في جميع أجهزة الشبكة مثل أجهزة الكمبيوتر والراوترات.</p>
-      </>
-    ),
-  },
-  {
-    name: 'ICMP',
-    layer: 'Network Layer',
-    layerColor: 'bg-green-900 text-green-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول رسائل التحكم في الإنترنت. يستخدم لإرسال رسائل التشخيص والأخطاء، مثل "الوجهة غير قابلة للوصول".</p>
-        <p><strong>أين يستخدم:</strong> في أدوات الشبكات الشهيرة مثل <code className="text-yellow-300">ping</code> (لاختبار الاتصال) و <code className="text-yellow-300">traceroute</code> (لتتبع مسار الحزمة).</p>
-        <p><strong>كيفية التفعيل:</strong> لا يتم "تفعيله" بشكل مباشر، بل هو جزء من حزمة بروتوكولات IP وتستخدمه أنظمة التشغيل وأجهزة الشبكة تلقائيًا.</p>
-      </>
-    ),
-  },
-  {
-    name: 'Ethernet',
-    layer: 'Data Link Layer',
-    layerColor: 'bg-purple-900 text-purple-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> هو المعيار الأكثر شيوعًا لتقنيات الشبكات المحلية السلكية (LAN). يحدد كيفية تنسيق البيانات للإرسال عبر الوسائط المادية (الكابلات) والعنونة المادية (MAC Address).</p>
-        <p><strong>أين يستخدم:</strong> في كل مرة تقوم فيها بتوصيل جهاز كمبيوتر بالشبكة باستخدام كابل شبكة.</p>
-        <p><strong>كيفية التفعيل:</strong> مدعوم في جميع بطاقات الشبكة (NICs) والمحولات (Switches) الحديثة.</p>
-      </>
-    ),
-  },
-  {
-    name: 'ARP',
-    layer: 'Data Link Layer',
-    layerColor: 'bg-purple-900 text-purple-200',
-    content: (
-      <>
-        <p><strong>الوظيفة:</strong> بروتوكول تحليل العنوان. يقوم بمهمة حيوية وهي ربط عنوان IP (المنطقي) بعنوان MAC (المادي) المقابل له داخل نفس الشبكة المحلية.</p>
-        <p><strong>أين يستخدم:</strong> عندما يحتاج جهاز لإرسال بيانات إلى جهاز آخر على نفس الشبكة، يرسل طلب ARP "من يملك عنوان IP هذا؟" ليعرف عنوان MAC الخاص به.</p>
-        <p><strong>كيفية التفعيل:</strong> يعمل تلقائيًا في الخلفية على جميع الأجهزة المتصلة بالشبكة.</p>
-      </>
-    ),
-  },
-];
-
 const ProtocolsSection: React.FC = () => {
+  const { t } = useI18n();
+
+  const applicationLayerProtocols = [
+    { name: 'HTTP', content: <><p><strong>{t('function')}:</strong> {t('protocols.http.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.http.info')}</p></> },
+    { name: 'HTTPS', content: <><p><strong>{t('function')}:</strong> {t('protocols.https.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.https.info')}</p></> },
+    { name: 'DNS', content: <><p><strong>{t('function')}:</strong> {t('protocols.dns.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.dns.info')}</p></> },
+    { name: 'DHCP', content: <><p><strong>{t('function')}:</strong> {t('protocols.dhcp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.dhcp.info')}</p></> },
+    { name: 'FTP', content: <><p><strong>{t('function')}:</strong> {t('protocols.ftp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ftp.info')}</p></> },
+    { name: 'SSH', content: <><p><strong>{t('function')}:</strong> {t('protocols.ssh.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ssh.info')}</p></> },
+    { name: 'Telnet', content: <><p><strong>{t('function')}:</strong> {t('protocols.telnet.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.telnet.info')}</p></> },
+    { name: 'SMTP', content: <><p><strong>{t('function')}:</strong> {t('protocols.smtp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.smtp.info')}</p></> },
+    { name: 'POP3', content: <><p><strong>{t('function')}:</strong> {t('protocols.pop3.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.pop3.info')}</p></> },
+    { name: 'IMAP', content: <><p><strong>{t('function')}:</strong> {t('protocols.imap.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.imap.info')}</p></> },
+    { name: 'NTP', content: <><p><strong>{t('function')}:</strong> {t('protocols.ntp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ntp.info')}</p></> },
+    { name: 'SNMP', content: <><p><strong>{t('function')}:</strong> {t('protocols.snmp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.snmp.info')}</p></> },
+    { name: 'Syslog', content: <><p><strong>{t('function')}:</strong> {t('protocols.syslog.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.syslog.info')}</p></> },
+  ].map(p => ({ ...p, layer: t('protocols.layers.application'), layerColor: 'bg-blue-900 text-blue-200' }));
+
+  const transportLayerProtocols = [
+    { name: 'TCP', content: <><p><strong>{t('function')}:</strong> {t('protocols.tcp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.tcp.info')}</p></> },
+    { name: 'UDP', content: <><p><strong>{t('function')}:</strong> {t('protocols.udp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.udp.info')}</p></> },
+  ].map(p => ({ ...p, layer: t('protocols.layers.transport'), layerColor: 'bg-orange-900 text-orange-200' }));
+
+  const networkLayerProtocols = [
+    { name: 'IP', content: <><p><strong>{t('function')}:</strong> {t('protocols.ip.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ip.info')}</p></> },
+    { name: 'ICMP', content: <><p><strong>{t('function')}:</strong> {t('protocols.icmp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.icmp.info')}</p></> },
+    { name: 'NAT', content: <><p><strong>{t('function')}:</strong> {t('protocols.nat.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.nat.info')}</p></> },
+    { name: 'IPsec', content: <><p><strong>{t('function')}:</strong> {t('protocols.ipsec.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ipsec.info')}</p></> },
+    { name: 'OSPF', content: <><p><strong>{t('function')}:</strong> {t('protocols.ospf.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ospf.info')}</p></> },
+    { name: 'EIGRP', content: <><p><strong>{t('function')}:</strong> {t('protocols.eigrp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.eigrp.info')}</p></> },
+    { name: 'RIP', content: <><p><strong>{t('function')}:</strong> {t('protocols.rip.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.rip.info')}</p></> },
+    { name: 'BGP', content: <><p><strong>{t('function')}:</strong> {t('protocols.bgp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.bgp.info')}</p></> },
+    { name: 'HSRP', content: <><p><strong>{t('function')}:</strong> {t('protocols.hsrp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.hsrp.info')}</p></> },
+  ].map(p => ({ ...p, layer: t('protocols.layers.network'), layerColor: 'bg-green-900 text-green-200' }));
+
+  const dataLinkLayerProtocols = [
+    { name: 'Ethernet', content: <><p><strong>{t('function')}:</strong> {t('protocols.ethernet.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ethernet.info')}</p></> },
+    { name: 'ARP', content: <><p><strong>{t('function')}:</strong> {t('protocols.arp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.arp.info')}</p></> },
+    { name: 'STP', content: <><p><strong>{t('function')}:</strong> {t('protocols.stp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.stp.info')}</p></> },
+    { name: '802.1Q', content: <><p><strong>{t('function')}:</strong> {t('protocols.vlan_tagging.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.vlan_tagging.info')}</p></> },
+    { name: 'PPP', content: <><p><strong>{t('function')}:</strong> {t('protocols.ppp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.ppp.info')}</p></> },
+    { name: 'LACP', content: <><p><strong>{t('function')}:</strong> {t('protocols.lacp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.lacp.info')}</p></> },
+    { name: 'CDP/LLDP', content: <><p><strong>{t('function')}:</strong> {t('protocols.cdp_lldp.func')}</p><p><strong>{t('info')}:</strong> {t('protocols.cdp_lldp.info')}</p></> },
+  ].map(p => ({ ...p, layer: t('protocols.layers.data_link'), layerColor: 'bg-purple-900 text-purple-200' }));
+
+
+  const protocolGroups = [
+    { title: t('protocols.layers.application'), protocols: applicationLayerProtocols },
+    { title: t('protocols.layers.transport'), protocols: transportLayerProtocols },
+    { title: t('protocols.layers.network'), protocols: networkLayerProtocols },
+    { title: t('protocols.layers.data_link'), protocols: dataLinkLayerProtocols },
+  ];
+
   return (
     <div>
-      <h2 className="text-3xl font-bold text-cyan-400 mb-6">شرح بروتوكولات الشبكات الأساسية (CCNAv7)</h2>
-      <p className="text-gray-400 mb-8">
-        هنا ستجد شرحًا مبسطًا لأهم البروتوكولات التي تشكل أساس الإنترنت والشبكات. كل بروتوكول له دور محدد ويعمل في طبقة معينة من نموذج OSI/TCP-IP.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {protocols.map((proto) => (
-          <ProtocolCard key={proto.name} name={proto.name} layer={proto.layer} layerColor={proto.layerColor}>
-            {proto.content}
-          </ProtocolCard>
-        ))}
-      </div>
+      <h2 className="text-3xl font-bold text-cyan-400 mb-6">{t('protocols.title')}</h2>
+      <p className="text-gray-400 mb-8">{t('protocols.subtitle')}</p>
+
+      {protocolGroups.map(group => (
+        <div key={group.title} className="mb-12">
+          <h3 className="text-2xl font-semibold text-white mb-6 border-b-2 border-gray-700 pb-2">{group.title}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {group.protocols.map((proto) => (
+              <ProtocolCard key={proto.name} name={proto.name} layer={proto.layer} layerColor={proto.layerColor}>
+                {proto.content}
+              </ProtocolCard>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

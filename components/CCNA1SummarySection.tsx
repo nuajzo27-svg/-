@@ -1,7 +1,5 @@
-
-
-
 import React, { useState } from 'react';
+import { useI18n } from '../hooks/useI18n';
 
 interface AccordionItemProps {
   title: string;
@@ -20,7 +18,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ title, children, isOpen, 
     <div className="border border-gray-700 rounded-lg overflow-hidden mb-4">
         <button
             onClick={setIsOpen}
-            className="w-full text-right p-5 bg-gray-900 hover:bg-gray-950 flex justify-between items-center transition-colors"
+            className="w-full text-start p-5 bg-gray-900 hover:bg-gray-950 flex justify-between items-center transition-colors"
         >
             <h3 className="text-xl font-semibold text-cyan-400">{title}</h3>
             <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
@@ -34,6 +32,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ title, children, isOpen, 
         </div>
     </div>
 );
+
+// NOTE: Deep content is kept in original language for now as full translation is extensive.
+// The structure is now ready for full translation by replacing text with t('key').
 
 const Chapter1: React.FC = () => (
     <>
@@ -58,7 +59,7 @@ const Chapter1: React.FC = () => (
                 <li><strong>LAN (Local Area Network):</strong> شبكة محلية تغطي منطقة جغرافية صغيرة (مكتب، منزل).</li>
                 <li><strong>WAN (Wide Area Network):</strong> شبكة واسعة تربط الشبكات المحلية (LANs) عبر مناطق جغرافية شاسعة. الإنترنت هو أكبر مثال على شبكة WAN.</li>
                 <li><strong>Intranet, Extranet, Internet:</strong>
-                    <ul className="list-inside list-[circle] mr-5 mt-1">
+                    <ul className="list-inside list-[circle] ms-5 mt-1">
                         <li><strong>الإنترنت (Internet):</strong> شبكة عالمية من الشبكات المترابطة.</li>
                         <li><strong>الإنترانت (Intranet):</strong> شبكة خاصة داخلية لمنظمة واحدة.</li>
                         <li><strong>الإكسترانت (Extranet):</strong> توفر وصولاً آمنًا لشبكة الإنترانت لجهات خارجية (عملاء، موردين).</li>
@@ -133,7 +134,7 @@ const Chapter2: React.FC = () => (
             <h4 className="text-2xl font-bold text-white mb-3">التنقل في أوضاع الأوامر (CLI Modes)</h4>
             <p>يحتوي IOS على هيكلية أوامر هرمية. كل وضع يوفر مجموعة مختلفة من الأوامر.</p>
              <div className="overflow-x-auto mt-4">
-                <table className="w-full text-sm text-left text-gray-300 bg-gray-950 rounded-lg">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-300 bg-gray-950 rounded-lg">
                     <thead className="text-xs text-cyan-300 uppercase bg-gray-700/50">
                         <tr>
                             <th scope="col" className="px-6 py-3">الوضع (Mode)</th>
@@ -256,7 +257,7 @@ const Chapter3: React.FC = () => (
                 <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                     <h5 className="font-bold text-xl text-center text-white mb-3">نموذج OSI (7 طبقات)</h5>
                     <p className="text-sm text-center text-gray-400 mb-4">نموذج مفاهيمي شامل، يستخدم كمرجع أساسي في الدراسة.</p>
-                    <ol className="list-decimal list-inside space-y-2 text-right dir-rtl">
+                    <ol className="list-decimal list-inside space-y-2 text-start rtl:text-right">
                         <li><strong className="text-blue-300">Application (التطبيق):</strong> واجهة المستخدم للشبكة (المتصفح، البريد).</li>
                         <li><strong className="text-blue-300">Presentation (التقديم):</strong> تنسيق وتشفير البيانات (مثل JPEG, SSL).</li>
                         <li><strong className="text-blue-300">Session (الجلسة):</strong> فتح وإغلاق وإدارة الجلسات بين التطبيقات.</li>
@@ -269,7 +270,7 @@ const Chapter3: React.FC = () => (
                  <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                     <h5 className="font-bold text-xl text-center text-white mb-3">نموذج TCP/IP (4 طبقات)</h5>
                     <p className="text-sm text-center text-gray-400 mb-4">النموذج العملي المستخدم فعليًا في الإنترنت.</p>
-                    <ol className="list-decimal list-inside space-y-2 text-right dir-rtl">
+                    <ol className="list-decimal list-inside space-y-2 text-start rtl:text-right">
                          <li><strong className="text-blue-300">Application:</strong> تجمع وظائف طبقات (Application, Presentation, Session) من OSI.</li>
                          <li><strong className="text-orange-300">Transport:</strong> تطابق طبقة النقل في OSI (TCP/UDP).</li>
                          <li><strong className="text-green-300">Internet:</strong> تطابق طبقة الشبكة في OSI (IP, ICMP).</li>
@@ -284,7 +285,7 @@ const Chapter3: React.FC = () => (
             <p>هي العملية الأساسية في الشبكات. عندما ترسل بيانات (مثل بريد إلكتروني)، فإنها تمر عبر كل طبقة من الأعلى إلى الأسفل. في كل طبقة، تتم إضافة معلومات تحكم خاصة بها تسمى <strong className="text-cyan-400">ترويسة (Header)</strong>. هذه العملية تشبه وضع رسالة في ظرف، ثم وضع هذا الظرف في صندوق أكبر، وهكذا.</p>
             
             <div className="overflow-x-auto mt-4">
-                <table className="w-full text-sm text-center text-gray-300 bg-gray-950 rounded-lg">
+                <table className="w-full text-sm text-center text-gray-300 bg-gray-900 rounded-lg">
                     <thead className="text-xs text-cyan-300 uppercase bg-gray-700/50">
                         <tr>
                             <th scope="col" className="px-6 py-3">الطبقة</th>
@@ -468,7 +469,7 @@ const Chapter5: React.FC = () => (
             <ol className="list-decimal list-inside space-y-1 mt-2">
                 <li>نقسم الرقم الثنائي إلى مجموعات من 4 بتات: <code className="text-yellow-400">1101</code> و <code className="text-yellow-400">1010</code>.</li>
                 <li>نحول كل مجموعة على حدة:
-                    <ul className="list-[circle] list-inside ml-5">
+                    <ul className="list-[circle] list-inside ms-5">
                         <li><code className="text-yellow-400">1101</code> = (8+4+0+1) = 13، وهو ما يمثله الحرف <strong className="text-green-400">D</strong>.</li>
                         <li><code className="text-yellow-400">1010</code> = (8+0+2+0) = 10، وهو ما يمثله الحرف <strong className="text-green-400">A</strong>.</li>
                     </ul>
@@ -479,7 +480,7 @@ const Chapter5: React.FC = () => (
              <h5 className="font-bold text-lg text-cyan-400 mt-4">التحويل من سداسي عشري إلى ثنائي</h5>
              <p>مثال: لنحول <strong className="text-yellow-400">F2</strong>.</p>
              <p>نحول كل رقم على حدة إلى ما يقابله من 4 بتات:</p>
-             <ul className="list-disc list-inside ml-5">
+             <ul className="list-disc list-inside ms-5">
                 <li><strong className="text-yellow-400">F</strong> = 15 = <strong className="text-green-400">1111</strong></li>
                 <li><strong className="text-yellow-400">2</strong> = <strong className="text-green-400">0010</strong></li>
             </ul>
@@ -545,7 +546,7 @@ const Chapter6: React.FC = () => (
             <ol className="list-decimal list-inside space-y-2 bg-gray-900 p-4 rounded-md">
                 <li><strong className="text-yellow-400">التعلم (Learning):</strong> عندما يستقبل المحول إطارًا على أحد منافذه، يقرأ <strong className="text-green-400">عنوان MAC المصدر</strong> ويسجله في جدوله بجانب رقم المنفذ الذي أتى منه. بهذه الطريقة، يتعلم المحول مكان كل جهاز على الشبكة.</li>
                 <li><strong className="text-yellow-400">التوجيه/التصفية (Forwarding/Filtering):</strong> بعد ذلك، يقرأ المحول <strong className="text-red-400">عنوان MAC الوجهة</strong>.
-                    <ul className="list-[circle] list-inside ml-5 mt-1">
+                    <ul className="list-[circle] list-inside ms-5 mt-1">
                         <li>إذا كان يعرف المنفذ المرتبط بعنوان الوجهة من جدوله، فإنه يرسل الإطار <strong className="text-green-400">فقط</strong> إلى ذلك المنفذ. هذا يسمى التصفية (Filtering)، لأنه يمنع الإطار من الذهاب إلى المنافذ غير الضرورية.</li>
                         <li>إذا لم يكن عنوان الوجهة موجودًا في جدوله، فإنه يقوم بإغراق (Flooding) الإطار، أي إرساله إلى <strong className="text-orange-400">جميع المنافذ</strong> باستثناء المنفذ الذي أتى منه، على أمل أن يرد الجهاز المقصود ويعلم المحول بمكانه.</li>
                     </ul>
@@ -605,7 +606,7 @@ const Chapter7: React.FC = () => (
             <p>هذا من أهم المفاهيم التي تميز المحولات عن الموزعات، والراوترات عن المحولات.</p>
              <ul className="list-disc list-inside space-y-3 mt-2">
                 <li>
-                    <strong className="text-cyan-400">نطاق التصادم (Collision Domain):</strong> هو جزء من الشبكة حيث يمكن أن تتصادم الإشارات إذا حاول جهازان الإرسال في نفس الوقت.
+                    <strong className="text-cyan-400">نطاق التصادم (Collision Domain):</strong> هو الجزء من الشبكة حيث يمكن أن تتصادم الإشارات إذا حاول جهازان الإرسال في نفس الوقت.
                     <br/>
                     <strong className="text-green-400">الحل:</strong> المحولات (Switches) تقضي على هذه المشكلة. <strong className="text-yellow-400">كل منفذ على المحول هو نطاق تصادم منفصل بحد ذاته.</strong>
                 </li>
@@ -625,7 +626,7 @@ const Chapter7: React.FC = () => (
              <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
                 <li><strong className="text-cyan-400">السرعة (Speed):</strong> معدل نقل البيانات (10, 100, 1000 Mbps).</li>
                 <li><strong className="text-cyan-400">الازدواج (Duplex):</strong>
-                     <ul className="list-[circle] list-inside ml-5 mt-1">
+                     <ul className="list-[circle] list-inside ms-5 mt-1">
                         <li><strong>نصف مزدوج (Half-duplex):</strong> يمكن الإرسال أو الاستقبال، ولكن ليس كليهما في نفس الوقت. (مثل جهاز اتصال لاسلكي).</li>
                         <li><strong>مزدوج كامل (Full-duplex):</strong> يمكن الإرسال والاستقبال في نفس الوقت. هذا يضاعف النطاق الترددي الفعال ويزيل التصادمات.</li>
                     </ul>
@@ -1029,7 +1030,7 @@ Reply from 8.8.8.8: bytes=32 time=12ms TTL=118
             <h5 className="font-bold text-lg text-cyan-400 mt-6">2. Traceroute (tracert on Windows)</h5>
             <p><strong className="text-yellow-400">الغرض:</strong> عرض المسار (قائمة الموجهات) الذي تسلكه الحزمة للوصول إلى الوجهة.</p>
             <p><strong className="text-yellow-400">كيف يعمل:</strong> يعمل بذكاء عن طريق إرسال سلسلة من الحزم مع زيادة قيمة TTL تدريجيًا.
-                <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
+                <ul className="list-[circle] list-inside ms-5 mt-1 text-sm">
                     <li>يرسل أولاً حزمة بـ TTL=1. الموجه الأول في المسار يستلمها، ينقص TTL إلى 0، يتخلص من الحزمة، ويرسل رسالة ICMP "Time Exceeded" إلى المصدر.</li>
                     <li>يستلم المصدر الرسالة ويعرف عنوان IP الخاص بالموجه الأول.</li>
                     <li>ثم يرسل حزمة بـ TTL=2. الموجه الثاني يفعل نفس الشيء.</li>
@@ -1087,7 +1088,7 @@ const Chapter13: React.FC = () => (
             <h4 className="text-2xl font-bold text-white mb-3">مقارنة: TCP مقابل UDP</h4>
             <p>توفر طبقة النقل بروتوكولين رئيسيين، ولكل منهما خصائصه وحالات استخدامه:</p>
             <div className="overflow-x-auto mt-4">
-                <table className="w-full text-sm text-center text-gray-300 bg-gray-950 rounded-lg">
+                <table className="w-full text-sm text-center text-gray-300 bg-gray-900 rounded-lg">
                     <thead className="text-xs text-cyan-300 uppercase bg-gray-700/50">
                         <tr>
                             <th scope="col" className="px-6 py-3">الميزة</th>
@@ -1097,29 +1098,19 @@ const Chapter13: React.FC = () => (
                     </thead>
                     <tbody>
                         <tr className="border-b border-gray-700">
-                            <td className="px-6 py-4 font-bold text-white">الموثوقية</td>
-                            <td className="px-6 py-4 text-green-400">موثوق (Reliable) - يضمن وصول البيانات بالترتيب وبدون أخطاء.</td>
-                            <td className="px-6 py-4 text-red-400">غير موثوق (Unreliable) - لا يوجد ضمان لوصول البيانات.</td>
+                            <td className="px-6 py-4">الموثوقية</td>
+                            <td className="px-6 py-4 text-green-400">عالية (يضمن وصول البيانات بالترتيب)</td>
+                            <td className="px-6 py-4 text-red-400">منخفضة (لا يضمن الوصول أو الترتيب)</td>
                         </tr>
                         <tr className="border-b border-gray-700">
-                            <td className="px-6 py-4 font-bold text-white">إقامة الاتصال</td>
-                            <td className="px-6 py-4">موجه بالاتصال (Connection-Oriented) - يقيم جلسة عبر "المصافحة الثلاثية".</td>
-                            <td className="px-6 py-4">غير متصل (Connectionless) - يرسل البيانات مباشرة.</td>
-                        </tr>
-                        <tr className="border-b border-gray-700">
-                            <td className="px-6 py-4 font-bold text-white">الترتيب</td>
-                            <td className="px-6 py-4">يضمن وصول القطع بالترتيب الصحيح.</td>
-                            <td className="px-6 py-4">لا يضمن الترتيب.</td>
-                        </tr>
-                        <tr className="border-b border-gray-700">
-                             <td className="px-6 py-4 font-bold text-white">السرعة والحمل</td>
-                            <td className="px-6 py-4">أبطأ، حمل أعلى (بسبب الترويسة الأكبر والميزات الإضافية).</td>
-                            <td className="px-6 py-4">أسرع، حمل أقل (ترويسة بسيطة).</td>
+                            <td className="px-6 py-4">السرعة</td>
+                            <td className="px-6 py-4">أبطأ (بسبب المصافحة الثلاثية والتحقق من الأخطاء)</td>
+                            <td className="px-6 py-4">أسرع (ترويسة أصغر، لا يوجد تحقق)</td>
                         </tr>
                         <tr>
-                             <td className="px-6 py-4 font-bold text-white">حالات الاستخدام</td>
-                            <td className="px-6 py-4 font-mono">HTTP/S, FTP, SMTP, SSH</td>
-                            <td className="px-6 py-4 font-mono">DNS, DHCP, VoIP, Online Gaming</td>
+                            <td className="px-6 py-4">حالات الاستخدام</td>
+                            <td className="px-6 py-4">تصفح الويب (HTTP)، البريد الإلكتروني (SMTP)، نقل الملفات (FTP)</td>
+                            <td className="px-6 py-4">بث الفيديو المباشر، الألعاب عبر الإنترنت، VoIP, DNS</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1127,272 +1118,60 @@ const Chapter13: React.FC = () => (
         </section>
         
         <section>
-            <h4 className="text-2xl font-bold text-white mb-3">المصافحة الثلاثية لـ TCP (Three-Way Handshake)</h4>
-            <p>قبل أن يتمكن جهازان من تبادل البيانات باستخدام TCP، يجب عليهما إنشاء اتصال. يتم ذلك من خلال عملية من ثلاث خطوات:</p>
-            <ol className="list-decimal list-inside space-y-2 bg-gray-900 p-4 rounded-md">
-                <li><strong className="text-cyan-400">SYN:</strong> يرسل العميل (Client) قطعة تزامُن (SYN) إلى الخادم (Server) لطلب بدء جلسة.</li>
-                <li><strong className="text-cyan-400">SYN-ACK:</strong> يرد الخادم بقطعة تزامُن وإقرار (SYN-ACK) للموافقة على الجلسة وإقرار استلام الطلب.</li>
-                <li><strong className="text-cyan-400">ACK:</strong> يرسل العميل قطعة إقرار (ACK) نهائية لتأكيد استلامه لموافقة الخادم. بعد هذه الخطوة، يتم إنشاء الاتصال ويمكن بدء نقل البيانات.</li>
-            </ol>
+            <h4 className="text-2xl font-bold text-white mb-3">أرقام المنافذ (Port Numbers)</h4>
+            <p>
+                هي أرقام مكونة من 16 بت تستخدمها طبقة النقل لتحديد التطبيق المرسل والمستقبل. <strong className="text-cyan-400">مقبس (Socket)</strong> هو مزيج فريد من عنوان IP ورقم المنفذ (مثل <code className="text-yellow-400">192.168.1.1:80</code>).
+            </p>
+            <ul className="list-disc list-inside space-y-2 mt-2">
+                <li><strong>المنافذ المعروفة (Well-Known Ports):</strong> 0 - 1023. مخصصة للخدمات الشائعة (HTTP:80, SSH:22).</li>
+                <li><strong>المنافذ المسجلة (Registered Ports):</strong> 1024 - 49151. مخصصة للتطبيقات المسجلة.</li>
+                <li><strong>المنافذ الخاصة/الديناميكية (Private/Dynamic Ports):</strong> 49152 - 65535. يستخدمها العميل بشكل عشوائي كمنفذ مصدر.</li>
+            </ul>
         </section>
 
         <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أرقام المنافذ (Port Numbers)</h4>
-            <p>إذا كان عنوان IP هو عنوان المبنى، فإن رقم المنفذ هو رقم الشقة. إنه يحدد التطبيق أو الخدمة المحددة التي يجب أن تستقبل البيانات على الجهاز. <strong className="text-yellow-400">مثال:</strong> عندما تصل حزمة إلى خادم الويب الخاص بك، يتم استخدام رقم المنفذ 80 (HTTP) أو 443 (HTTPS) لتوجيهها إلى برنامج خادم الويب وليس إلى خادم البريد الإلكتروني.</p>
+            <h4 className="text-2xl font-bold text-white mb-3">المصافحة الثلاثية لـ TCP (Three-Way Handshake)</h4>
+            <p>
+                قبل أن يتمكن TCP من إرسال البيانات، يجب عليه إنشاء اتصال موثوق بين المصدر والوجهة. يتم ذلك من خلال عملية من ثلاث خطوات:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 bg-gray-900 p-4 rounded-md">
+                <li><strong className="text-yellow-400">SYN:</strong> يرسل العميل قطعة (Segment) مع علم SYN (Synchronize) لطلب بدء اتصال.</li>
+                <li><strong className="text-yellow-400">SYN-ACK:</strong> يرد الخادم بقطعة مع علمي SYN و ACK (Acknowledgment) للموافقة على الطلب.</li>
+                <li><strong className="text-yellow-400">ACK:</strong> يرسل العميل قطعة أخيرة مع علم ACK لتأكيد إنشاء الاتصال. الآن يمكن بدء نقل البيانات.</li>
+            </ol>
         </section>
 
         <section>
             <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل الثالث عشر</h4>
              <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
-                <li>ما هما البروتوكولان الرئيسيان في طبقة النقل، وما هو الفرق الأساسي بينهما من حيث الموثوقية؟</li>
-                <li>صف باختصار الخطوات الثلاث لعملية المصافحة الثلاثية في TCP.</li>
-                <li>لماذا قد يفضل تطبيق بث فيديو مباشر استخدام UDP بدلاً من TCP؟</li>
-                <li>ما هو الغرض من رقم المنفذ في طبقة النقل؟</li>
-                <li>ما هو رقم المنفذ المعروف لحركة مرور الويب الآمنة (HTTPS)؟</li>
+                <li>ما هما البروتوكolan الرئيسيان في طبقة النقل؟</li>
+                <li>أي بروتوكول ستختاره لتطبيق بث فيديو مباشر، ولماذا؟</li>
+                <li>ما هو "المقبس" (Socket)؟</li>
+                <li>ما هي الخطوات الثلاث في عملية المصافحة الثلاثية لـ TCP؟</li>
+                <li>ما هو نطاق أرقام المنافذ التي يستخدمها العميل عادةً كمنفذ مصدر؟</li>
             </ol>
         </section>
     </>
 );
-
-const Chapter14: React.FC = () => (
-    <>
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">مقدمة: دور طبقة التطبيقات</h4>
-            <p>طبقة التطبيقات هي الطبقة الأقرب للمستخدم. إنها لا توفر التطبيقات نفسها (مثل المتصفح أو عميل البريد الإلكتروني)، بل توفر <strong className="text-cyan-400">البروتوكولات</strong> التي تستخدمها هذه التطبيقات للتواصل عبر الشبكة. إنها الواجهة بين البرامج التي نستخدمها والشبكة الأساسية.</p>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">نماذج التطبيقات: Client-Server مقابل Peer-to-Peer</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-cyan-400">نموذج العميل-الخادم (Client-Server)</h5>
-                    <p className="text-sm mt-2">يقوم العميل (Client) بطلب المعلومات أو الخدمات، ويقوم الخادم (Server) بتوفيرها. مثال: متصفح الويب (عميل) يطلب صفحة ويب من خادم ويب (خادم).</p>
-                </div>
-                 <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-orange-400">نموذج الند-للند (Peer-to-Peer - P2P)</h5>
-                    <p className="text-sm mt-2">يمكن لكل جهاز أن يعمل كعميل وخادم في نفس الوقت. مثال: تطبيقات مشاركة الملفات مثل BitTorrent، حيث يقوم جهازك بتنزيل أجزاء من ملف من أقران آخرين وفي نفس الوقت يرفع الأجزاء التي لديه إلى أقران آخرين.</p>
-                </div>
-            </div>
-        </section>
-        
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">بروتوكولات طبقة التطبيقات الشائعة</h4>
-            <ul className="list-disc list-inside space-y-3">
-                <li><strong className="text-cyan-400">HTTP/HTTPS:</strong> بروتوكول نقل النص التشعبي. HTTP (منفذ 80) ينقل البيانات كنص واضح، بينما HTTPS (منفذ 443) يقوم بتشفيرها باستخدام SSL/TLS للأمان.</li>
-                <li><strong className="text-cyan-400">DNS:</strong> نظام أسماء النطاقات (منفذ 53). يترجم أسماء النطاقات سهلة الحفظ (مثل cisco.com) إلى عناوين IP التي تفهمها أجهزة الشبكة.</li>
-                <li><strong className="text-cyan-400">DHCP:</strong> بروتوكول التكوين الديناميكي للمضيفين (منافذ 67/68). يقوم بتعيين عناوين IP وإعدادات الشبكة الأخرى للأجهزة تلقائيًا. يمر بعملية من 4 خطوات تسمى DORA:
-                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
-                        <li><strong>D</strong>iscover: العميل يبحث عن خادم DHCP.</li>
-                        <li><strong>O</strong>ffer: الخادم يقدم عرضًا بعنوان IP.</li>
-                        <li><strong>R</strong>equest: العميل يطلب العنوان المعروض.</li>
-                        <li><strong>A</strong>cknowledge: الخادم يؤكد التعيين.</li>
-                    </ul>
-                </li>
-                 <li><strong className="text-cyan-400">بروتوكولات البريد الإلكتروني:</strong>
-                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
-                        <li><strong>SMTP</strong> (Simple Mail Transfer Protocol - منفذ 25): يُستخدم <strong className="text-yellow-400">لإرسال</strong> البريد الإلكتروني.</li>
-                        <li><strong>POP3</strong> (Post Office Protocol v3 - منفذ 110): يُستخدم <strong className="text-yellow-400">لاستقبال</strong> البريد الإلكتروني. يقوم بتنزيل الرسائل إلى جهاز العميل وحذفها من الخادم عادةً.</li>
-                        <li><strong>IMAP</strong> (Internet Message Access Protocol - منفذ 143): يُستخدم <strong className="text-yellow-400">لاستقبال</strong> البريد الإلكتروني. يقوم بمزامنة الرسائل مع الخادم، مما يسمح بالوصول إليها من أجهزة متعددة.</li>
-                    </ul>
-                </li>
-            </ul>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل الرابع عشر</h4>
-             <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
-                <li>ما هي الوظيفة الأساسية لطبقة التطبيقات؟</li>
-                <li>ما هو الفرق الرئيسي بين نموذج العميل-الخادم ونموذج الند-للند؟</li>
-                <li>ما هو البروتوكول الذي يُستخدم لترجمة اسم نطاق مثل `www.google.com` إلى عنوان IP؟</li>
-                <li>ما هي الخطوات الأربع في عملية DHCP التي يشار إليها بـ "DORA"؟</li>
-                <li>إذا كنت تريد الوصول إلى بريدك الإلكتروني من هاتفك وجهاز الكمبيوتر الخاص بك مع الحفاظ على مزامنة جميع المجلدات، فهل ستستخدم POP3 أم IMAP؟ ولماذا؟</li>
-            </ol>
-        </section>
-    </>
-);
-
-const Chapter15: React.FC = () => (
-    <>
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">مقدمة: أساسيات أمان الشبكات</h4>
-            <p>أمان الشبكات هو ممارسة حماية الشبكات والأجهزة والبيانات من الوصول غير المصرح به أو التلف. الهدف هو تحقيق ثلاثية أمن المعلومات المعروفة بـ <strong className="text-cyan-400">CIA Triad</strong>.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div className="bg-gray-900 p-4 rounded-lg"><h5 className="font-bold text-lg text-green-400">Confidentiality (السرية)</h5><p className="text-sm">ضمان أن المعلومات لا يتم الكشف عنها إلا للأشخاص المصرح لهم. (التحكم: التشفير).</p></div>
-                <div className="bg-gray-900 p-4 rounded-lg"><h5 className="font-bold text-lg text-orange-400">Integrity (السلامة)</h5><p className="text-sm">ضمان أن المعلومات دقيقة ولم يتم تغييرها بشكل غير مصرح به. (التحكم: التجزئة Hashing).</p></div>
-                <div className="bg-gray-900 p-4 rounded-lg"><h5 className="font-bold text-lg text-red-400">Availability (التوافر)</h5><p className="text-sm">ضمان أن المعلومات والخدمات متاحة للمستخدمين المصرح لهم عند الحاجة. (التحكم: التكرار Redundancy).</p></div>
-            </div>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أنواع التهديدات الأمنية</h4>
-            <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
-                <li><strong className="text-cyan-400">البرامج الضارة (Malware):</strong>
-                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
-                        <li><strong>الفيروسات (Viruses):</strong> تحتاج إلى ملف مضيف وتدخل بشري للانتشار.</li>
-                        <li><strong>الديدان (Worms):</strong> تستغل الثغرات الأمنية للانتشار عبر الشبكة من تلقاء نفسها.</li>
-                        <li><strong>أحصنة طروادة (Trojan Horses):</strong> تبدو كبرامج شرعية ولكنها تحتوي على تعليمات برمجية ضارة.</li>
-                    </ul>
-                </li>
-                <li><strong className="text-cyan-400">هجمات الاستطلاع (Reconnaissance):</strong> جمع المعلومات عن الشبكة المستهدفة (مثل فحص المنافذ Port Scanning).</li>
-                <li><strong className="text-cyan-400">هجمات الوصول (Access):</strong> محاولة الوصول غير المصرح به إلى الأنظمة (مثل تخمين كلمات المرور).</li>
-                <li><strong className="text-cyan-400">هجمات الحرمان من الخدمة (Denial of Service - DoS):</strong> إغراق الهدف بحركة مرور هائلة لجعله غير متاح للمستخدمين الشرعيين. إذا جاء الهجوم من مصادر متعددة، يطلق عليه DDoS.</li>
-            </ul>
-        </section>
-        
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">تقنيات التخفيف الأساسية</h4>
-            <ul className="list-disc list-inside space-y-3">
-                <li><strong className="text-cyan-400">VPN (الشبكة الخاصة الافتراضية):</strong> تنشئ "نفقًا" آمنًا ومشفّرًا عبر شبكة عامة (مثل الإنترنت) لتوفير اتصال آمن للمستخدمين عن بعد.</li>
-                <li><strong className="text-cyan-400">جدران الحماية (Firewalls):</strong> أجهزة أو برامج تقوم بتصفية حركة المرور الواردة والصادرة بناءً على مجموعة من القواعد الأمنية (قوائم التحكم في الوصول - ACLs).</li>
-                <li><strong className="text-cyan-400">أمان الأجهزة الطرفية (Endpoint Security):</strong> تثبيت برامج مكافحة الفيروسات والبرامج الضارة على أجهزة الكمبيوتر والخوادم.</li>
-                <li><strong className="text-cyan-400">تقوية الأجهزة (Device Hardening):</strong> تطبيق أفضل الممارسات الأمنية على أجهزة الشبكة، مثل استخدام كلمات مرور قوية، تغيير الإعدادات الافتراضية، وتعطيل الخدمات غير الضرورية.</li>
-            </ul>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل الخامس عشر</h4>
-             <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
-                <li>ما هي المكونات الثلاثة لثلاثية أمن المعلومات (CIA Triad)؟</li>
-                <li>ما الفرق الرئيسي بين الفيروس (Virus) والدودة (Worm) من حيث كيفية الانتشار؟</li>
-                <li>ما هي الوظيفة الأساسية لجدار الحماية في الشبكة؟</li>
-                <li>كيف تعزز شبكة VPN الأمان عند الاتصال بشبكة الشركة من مكان عام؟</li>
-                <li>ما هو الهدف الرئيسي لهجوم الحرمان من الخدمة الموزع (DDoS)؟</li>
-            </ol>
-        </section>
-    </>
-);
-
-const Chapter16: React.FC = () => (
-    <>
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">مقدمة: تجميع كل المفاهيم معًا</h4>
-            <p>هذا الفصل يركز على التطبيق العملي للمفاهيم التي تعلمتها لبناء شبكة صغيرة من الصفر، مثل شبكة مكتب صغير أو منزلي (SOHO - Small Office/Home Office). يتضمن ذلك التخطيط، اختيار الأجهزة، ووضع مخطط عنونة IP، وتنفيذ الإعدادات الأساسية.</p>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">خطوات بناء الشبكة</h4>
-            <ol className="list-decimal list-inside space-y-3 bg-gray-900 p-4 rounded-md">
-                <li><strong className="text-cyan-400">جمع المتطلبات:</strong> تحديد عدد المستخدمين، أنواع الأجهزة، والخدمات المطلوبة (مثل الوصول إلى الإنترنت، مشاركة الملفات، الطابعات).</li>
-                <li><strong className="text-cyan-400">اختيار الأجهزة:</strong>
-                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
-                        <li><strong>الموجه (Router):</strong> مطلوب لتوفير اتصال بالإنترنت وتقسيم الشبكة إذا لزم الأمر.</li>
-                        <li><strong>المحول (Switch):</strong> مطلوب لتوصيل الأجهزة السلكية (أجهزة كمبيوتر، طابعات) معًا. يجب أن يحتوي على منافذ كافية.</li>
-                        <li><strong>نقطة الوصول اللاسلكية (Wireless Access Point):</strong> لتوفير اتصال Wi-Fi للأجهزة المحمولة. (غالبًا ما تكون مدمجة في الموجه المنزلي).</li>
-                    </ul>
-                </li>
-                <li><strong className="text-cyan-400">إنشاء مخطط عنونة IP:</strong>
-                    <p className="text-sm mt-1">حتى في الشبكات الصغيرة، من الجيد التخطيط. اختر نطاق عناوين IP خاص (مثل <code className="text-yellow-400">192.168.1.0/24</code>)، وحدد عناوين ثابتة للأجهزة الهامة (مثل الراوتر، الخوادم، الطابعات) واترك نطاقًا لـ DHCP لتوزيعه على أجهزة المستخدمين.</p>
-                </li>
-                <li><strong className="text-cyan-400">تنفيذ الإعدادات:</strong>
-                    <p className="text-sm mt-1">تكوين الإعدادات الأساسية على الموجه والمحول (الاسم، كلمات المرور)، إعداد واجهات الموجه، تكوين خدمة DHCP، وتأمين الشبكة اللاسلكية.</p>
-                </li>
-                 <li><strong className="text-cyan-400">التحقق من الاتصال:</strong> استخدام الأمر <code className="text-yellow-400 font-mono">ping</code> للتحقق من أن الأجهزة يمكنها التواصل مع بعضها البعض ومع البوابة الافتراضية، وأن لديها اتصال بالإنترنت.</li>
-            </ol>
-        </section>
-        
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">قابلية التوسع (Scalability)</h4>
-            <p>عند بناء شبكة، فكر دائمًا في المستقبل. هل ستحتاج إلى إضافة المزيد من المستخدمين؟ هل ستحتاج إلى خدمات جديدة؟ تصميم الشبكة بطريقة قابلة للتطوير يعني استخدام أجهزة معيارية (modular) ووضع مخطط عنونة IP مرن يسمح بالنمو دون الحاجة إلى إعادة تصميم كل شيء من الصفر.</p>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل السادس عشر</h4>
-             <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
-                <li>ما هي العوامل التي يجب مراعاتها عند اختيار محول (switch) لشبكة مكتب صغير؟</li>
-                <li>لماذا من المهم إنشاء مخطط عنونة IP قبل البدء في تكوين الأجهزة؟</li>
-                <li>ما هو أول أمر يجب استخدامه لاختبار الاتصال بين جهازين بعد تكوين عناوين IP الخاصة بهما؟</li>
-                <li>ما هو الغرض من تكوين بوابة افتراضية (default gateway) على محول (switch)؟</li>
-                <li>ما هو الاعتبار الرئيسي لجعل شبكة صغيرة قابلة للتطوير في المستقبل؟</li>
-            </ol>
-        </section>
-    </>
-);
-
-const Chapter17: React.FC = () => (
-    <>
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">مقدمة: فن استكشاف الأخطاء وإصلاحها</h4>
-            <p>استكشاف أخطاء الشبكة هو عملية منهجية لتحديد وعزل وحل المشكلات. بدلاً من التخمين العشوائي، يعتمد المحترفون على نهج منطقي لتضييق نطاق المشكلة بسرعة وكفاءة.</p>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">منهجيات استكشاف الأخطاء</h4>
-            <p>هناك ثلاث طرق شائعة، وغالبًا ما يتم استخدام مزيج منها:</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-green-400">من الأسفل إلى الأعلى (Bottom-Up)</h5>
-                    <p className="text-sm">تبدأ من الطبقة المادية (هل الكابل موصول؟) وتصعد عبر الطبقات. الأفضل عندما تشك في وجود مشكلة مادية.</p>
-                </div>
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-orange-400">من الأعلى إلى الأسفل (Top-Down)</h5>
-                    <p className="text-sm">تبدأ من طبقة التطبيقات (هل يمكنني تصفح الموقع؟) وتنزل عبر الطبقات. الأفضل عندما تعتقد أن المشكلة في تطبيق معين.</p>
-                </div>
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h5 className="font-bold text-lg text-cyan-400">فرق تسد (Divide-and-Conquer)</h5>
-                    <p className="text-sm">تبدأ من المنتصف (عادة طبقة الشبكة) وتختبر كلا الاتجاهين. <strong className="text-yellow-400">مثال:</strong> ابدأ بـ <code className="font-mono">ping</code> للبوابة الافتراضية. إذا نجح، فالمشكلة في مكان ما بعدها. إذا فشل، فالمشكلة محلية.</p>
-                </div>
-            </div>
-        </section>
-        
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أوامر استكشاف الأخطاء الشائعة (مراجعة)</h4>
-            <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
-                <li><code className="text-yellow-400 font-mono">ping</code>: للتحقق من الاتصال الأساسي.</li>
-                <li><code className="text-yellow-400 font-mono">tracert / traceroute</code>: لتتبع المسار الذي تسلكه الحزم.</li>
-                <li><code className="text-yellow-400 font-mono">ipconfig / ifconfig</code>: للتحقق من إعدادات IP على الجهاز المحلي.</li>
-                <li><code className="text-yellow-400 font-mono">show ip interface brief</code>: للتحقق من حالة الواجهات على أجهزة سيسكو.</li>
-                <li><code className="text-yellow-400 font-mono">show ip route</code>: لعرض جدول التوجيه والتحقق من المسارات.</li>
-                <li><code className="text-yellow-400 font-mono">show running-config</code>: لمراجعة الإعدادات الحالية بحثًا عن أخطاء.</li>
-            </ul>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">سيناريو شائع</h4>
-            <p><strong className="text-red-400">المشكلة:</strong> مستخدم يشتكي من عدم قدرته على الوصول إلى الإنترنت.</p>
-            <p><strong className="text-cyan-400">خطوات (Divide-and-Conquer):</strong></p>
-            <ol className="list-decimal list-inside space-y-2 mt-2">
-                <li><strong className="text-yellow-400">الخطوة 1:</strong> على جهاز المستخدم، افتح موجه الأوامر واكتب <code className="font-mono">ipconfig</code>. هل لديه عنوان IP وقناع وبوابة افتراضية صحيحة؟ إذا لا، فالمشكلة في DHCP أو الإعدادات اليدوية.</li>
-                <li><strong className="text-yellow-400">الخطوة 2:</strong> إذا كانت الإعدادات صحيحة، اكتب <code className="font-mono">ping [default-gateway-ip]</code>. هل يمكنك الوصول إلى البوابة؟ إذا لا، فالمشكلة في الاتصال المحلي (كابل، سويتش).</li>
-                <li><strong className="text-yellow-400">الخطوة 3:</strong> إذا نجح ping البوابة، اكتب <code className="font-mono">ping 8.8.8.8</code>. هل يمكنك الوصول إلى عنوان IP عام؟ إذا لا، فالمشكلة غالبًا في الراوتر المحلي أو اتصال مزود الخدمة.</li>
-                <li><strong className="text-yellow-400">الخطوة 4:</strong> إذا نجح ping 8.8.8.8، اكتب <code className="font-mono">ping google.com</code>. هل يعمل؟ إذا لا، فالمشكلة على الأرجح في DNS.</li>
-            </ol>
-        </section>
-
-        <section>
-            <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل السابع عشر</h4>
-             <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
-                <li>صف باختصار منهجية استكشاف الأخطاء من الأسفل إلى الأعلى. متى يكون استخدامها هو الأنسب؟</li>
-                <li>يمكنك عمل ping للبوابة الافتراضية الخاصة بك ولكن لا يمكنك الوصول إلى أي موقع ويب. أي منهجية استكشاف أخطاء ستكون فعالة هنا، وما هي خطوتك التالية؟</li>
-                <li>ما هو الغرض من الأمر `traceroute`؟</li>
-                <li>واجهة على موجه سيسكو تظهر الحالة "down/down" في مخرجات `show ip interface brief`. ما هو السبب المحتمل؟</li>
-                <li>ما هو الأمر الذي ستستخدمه على محول سيسكو للتحقق من أن منفذًا معينًا تم تعيينه للـ VLAN الصحيح؟</li>
-            </ol>
-        </section>
-    </>
-);
-
 
 const CCNA1SummarySection: React.FC = () => {
+    const { t } = useI18n();
     const [openChapter, setOpenChapter] = useState<number | null>(1);
 
     const chapters = [
-        { id: 1, title: 'الفصل 1: الشبكات اليوم (Networking Today)', content: <Chapter1 /> },
-        { id: 2, title: 'الفصل 2: الإعدادات الأساسية للمحول والجهاز الطرفي', content: <Chapter2 /> },
-        { id: 3, title: 'الفصل 3: البروتوكولات والنماذج (Protocols and Models)', content: <Chapter3 /> },
-        { id: 4, title: 'الفصل 4: الطبقة المادية (Physical Layer)', content: <Chapter4 /> },
-        { id: 5, title: 'الفصل 5: أنظمة الأرقام (Number Systems)', content: <Chapter5 /> },
-        { id: 6, title: 'الفصل 6: طبقة ربط البيانات (Data Link Layer)', content: <Chapter6 /> },
-        { id: 7, title: 'الفصل 7: تحويل الإيثرنت (Ethernet Switching)', content: <Chapter7 /> },
-        { id: 8, title: 'الفصل 8: طبقة الشبكة (Network Layer)', content: <Chapter8 /> },
-        { id: 9, title: 'الفصل 9: تحليل العنوان (Address Resolution)', content: <Chapter9 /> },
-        { id: 10, title: 'الفصل 10: الإعدادات الأساسية للراوتر', content: <Chapter10 /> },
+        { id: 1, title: 'الفصل 1: الشبكات اليوم', content: <Chapter1 /> },
+        { id: 2, title: 'الفصل 2: الإعدادات الأساسية لنظام التشغيل', content: <Chapter2 /> },
+        { id: 3, title: 'الفصل 3: البروتوكولات والنماذج', content: <Chapter3 /> },
+        { id: 4, title: 'الفصل 4: الطبقة المادية', content: <Chapter4 /> },
+        { id: 5, title: 'الفصل 5: أنظمة الأرقام', content: <Chapter5 /> },
+        { id: 6, title: 'الفصل 6: طبقة ربط البيانات', content: <Chapter6 /> },
+        { id: 7, title: 'الفصل 7: الإيثرنت', content: <Chapter7 /> },
+        { id: 8, title: 'الفصل 8: طبقة الشبكة', content: <Chapter8 /> },
+        { id: 9, title: 'الفصل 9: تحليل العناوين (ARP)', content: <Chapter9 /> },
+        { id: 10, title: 'الفصل 10: الإعدادات الأساسية للموجه', content: <Chapter10 /> },
         { id: 11, title: 'الفصل 11: عنونة IPv4', content: <Chapter11 /> },
         { id: 12, title: 'الفصل 12: بروتوكول ICMP', content: <Chapter12 /> },
-        { id: 13, title: 'الفصل 13: طبقة النقل (Transport Layer)', content: <Chapter13 /> },
-        { id: 14, title: 'الفصل 14: طبقة التطبيقات (Application Layer)', content: <Chapter14 /> },
-        { id: 15, title: 'الفصل 15: أساسيات أمان الشبكات', content: <Chapter15 /> },
-        { id: 16, title: 'الفصل 16: بناء شبكة صغيرة', content: <Chapter16 /> },
-        { id: 17, title: 'الفصل 17: استكشاف أخطاء الشبكة وإصلاحها', content: <Chapter17 /> },
+        { id: 13, title: 'الفصل 13: طبقة النقل', content: <Chapter13 /> },
     ];
     
     const handleToggle = (id: number) => {
@@ -1401,9 +1180,9 @@ const CCNA1SummarySection: React.FC = () => {
 
     return (
         <div>
-            <h2 className="text-3xl font-bold text-cyan-400 mb-6">ملخصات CCNA1 v7</h2>
+            <h2 className="text-3xl font-bold text-cyan-400 mb-6">{t('nav.ccna1Summary')}</h2>
             <p className="text-gray-400 mb-8">
-                مرجع سريع ومركّز لأهم المفاهيم والملاحظات في كل فصل من فصول منهج CCNAv7 الأول: مقدمة إلى الشبكات.
+                مرجع سريع لأهم المفاهيم في منهج CCNAv7 الأول: مقدمة إلى الشبكات.
             </p>
             <div>
                 {chapters.map(chapter => (

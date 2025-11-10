@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { QuestionType, SubnettingQuestion, SubnettingSolution, CurriculumLevel } from '../types';
 import { generateRandomQuestion, calculateSubnetDetails, calculateCidrForHosts, calculateVlsmLayout, evaluateAcl, findStpRootBridge, getProtocolAnswer } from '../services/subnettingCalculator';
+import { useI18n } from '../hooks/useI18n';
 
 // --- State Types ---
 type UserSubnettingAnswers = { [K in keyof Omit<SubnettingSolution, 'wildcardMask' | 'totalSubnets'>]?: string; };
@@ -8,6 +9,8 @@ type SubnettingFeedback = { [K in keyof UserSubnettingAnswers]?: boolean; };
 type PracticeMode = 'test' | 'calculator';
 
 const PracticeSection: React.FC = () => {
+    const { t } = useI18n();
+
     // --- Mode State ---
     const [practiceMode, setPracticeMode] = useState<PracticeMode>('test');
     const [activeCurriculum, setActiveCurriculum] = useState<CurriculumLevel>('ccna1');
@@ -189,13 +192,13 @@ const PracticeSection: React.FC = () => {
     const handleCalculate = () => {
         const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
         if (!ipRegex.test(customIp.trim())) {
-            setCustomError('الرجاء إدخال عنوان IP صالح.');
+            setCustomError(t('practice.calculator.errors.invalidIp'));
             setCustomSolution(null);
             return;
         }
         const cidrNum = parseInt(customCidr);
         if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
-            setCustomError('الرجاء إدخال رقم CIDR صالح بين 0 و 32.');
+            setCustomError(t('practice.calculator.errors.invalidCidr'));
             setCustomSolution(null);
             return;
         }
@@ -209,26 +212,12 @@ const PracticeSection: React.FC = () => {
     // --- RENDER FUNCTIONS ---
     const getDetailedFeedback = (key: keyof SubnettingFeedback): string | null => {
         if (!isAnswered || subnettingFeedback[key] === true || !subnettingSolution) return null;
-
-        switch(key) {
-            case 'networkAddress': return 'عنوان الشبكة هو أول عنوان في النطاق.';
-            case 'broadcastAddress': return 'عنوان البث هو آخر عنوان في النطاق.';
-            case 'firstUsableHost': return 'أول عنوان صالح هو عنوان الشبكة + 1.';
-            case 'lastUsableHost': return 'آخر عنوان صالح هو عنوان البث - 1.';
-            case 'numberOfHosts': return `تذكر الصيغة: 2^(32-CIDR) - 2.`;
-            case 'subnetMask': return 'تحقق من تحويل CIDR إلى قناع شبكة عشري.';
-            default: return 'الإجابة غير صحيحة.';
-        }
+        return t(`practice.feedback.${key}`);
     }
 
     const getVlsmFeedback = (key: 'networkAddress' | 'cidr'): string | null => {
         if (!isAnswered || !vlsmFeedback[key]) return null;
-
-        switch (key) {
-            case 'networkAddress': return 'تذكر أن تبدأ بالمتطلب الأكبر وتخصص الشبكات بالتسلسل.';
-            case 'cidr': return 'تأكد من حساب عدد بتات المضيف الصحيح للمتطلب المحدد.';
-            default: return 'الإجابة غير صحيحة.';
-        }
+        return t(`practice.feedback.vlsm_${key}`);
     }
 
     
@@ -236,18 +225,18 @@ const PracticeSection: React.FC = () => {
         if (!question || !subnettingSolution || !question.ipAddress || typeof question.cidr === 'undefined') return null;
         
         const inputFields: { key: keyof UserSubnettingAnswers; label: string }[] = [
-            { key: 'networkAddress', label: 'عنوان الشبكة' },
-            { key: 'subnetMask', label: 'قناع الشبكة' },
-            { key: 'firstUsableHost', label: 'أول IP صالح' },
-            { key: 'lastUsableHost', label: 'آخر IP صالح' },
-            { key: 'broadcastAddress', label: 'عنوان البث' },
-            { key: 'numberOfHosts', label: 'عدد الأجهزة المتاحة' },
+            { key: 'networkAddress', label: t('practice.fields.networkAddress') },
+            { key: 'subnetMask', label: t('practice.fields.subnetMask') },
+            { key: 'firstUsableHost', label: t('practice.fields.firstUsable') },
+            { key: 'lastUsableHost', label: t('practice.fields.lastUsable') },
+            { key: 'broadcastAddress', label: t('practice.fields.broadcastAddress') },
+            { key: 'numberOfHosts', label: t('practice.fields.numHosts') },
         ];
 
         return (
             <>
                 <div className="bg-gray-900 p-6 rounded-lg mb-6 border border-cyan-500/30">
-                    <p className="text-lg text-gray-400 mb-2">أوجد معلومات الشبكة للعنوان التالي:</p>
+                    <p className="text-lg text-gray-400 mb-2">{t('practice.questions.full_details_prompt')}</p>
                     <p className="text-4xl font-mono text-center text-yellow-400 tracking-wider">{question.ipAddress}/{question.cidr}</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -282,7 +271,7 @@ const PracticeSection: React.FC = () => {
                     <p className="text-xl text-gray-200 text-center leading-relaxed">{questionText}</p>
                 </div>
                 <div>
-                    <label htmlFor="singleAnswer" className="block mb-2 text-sm font-medium text-gray-300 text-center">أدخل إجابتك هنا</label>
+                    <label htmlFor="singleAnswer" className="block mb-2 text-sm font-medium text-gray-300 text-center">{t('practice.enterAnswer')}</label>
                     <input
                         type="text"
                         id="singleAnswer"
@@ -297,7 +286,7 @@ const PracticeSection: React.FC = () => {
                         }`}
                         aria-label="إجابة السؤال"
                     />
-                     {isAnswered && singleFeedback === false && question?.type === QuestionType.SCENARIO_CIDR_FOR_HOSTS && <p className="mt-1 text-xs text-red-400 text-center">تذكر الصيغة: 2^H - 2 &gt;= عدد الأجهزة.</p>}
+                     {isAnswered && singleFeedback === false && question?.type === QuestionType.SCENARIO_CIDR_FOR_HOSTS && <p className="mt-1 text-xs text-red-400 text-center">{t('practice.feedback.cidr_for_hosts')}</p>}
                      {showSolution && <p className="mt-2 text-lg text-center text-green-400 font-mono">{correctSingleAnswer}</p>}
                 </div>
             </div>
@@ -309,25 +298,22 @@ const PracticeSection: React.FC = () => {
         return (
             <div className="max-w-2xl mx-auto">
                 <div className="bg-gray-900 p-6 rounded-lg mb-6 border border-cyan-500/30 text-center">
-                    <p className="text-lg text-gray-400 mb-2">لديك الشبكة الرئيسية:</p>
+                    <p className="text-lg text-gray-400 mb-2">{t('practice.vlsm.mainNetwork')}</p>
                     <p className="text-3xl font-mono text-yellow-400 tracking-wider">{question.baseNetwork}/{question.baseCidr}</p>
-                    <p className="text-lg text-gray-400 mt-4 mb-2">والمطلوب إنشاء شبكات فرعية للمتطلبات التالية:</p>
+                    <p className="text-lg text-gray-400 mt-4 mb-2">{t('practice.vlsm.requirements')}</p>
                     <div className="flex justify-center gap-4 flex-wrap">
                         {question.vlsmHostRequirements.map((req, i) => (
                             <span key={`${req}-${i}`} className={`bg-gray-700 text-sm font-medium me-2 px-2.5 py-0.5 rounded ${req === question.vlsmTargetRequirement ? 'text-yellow-300 ring-2 ring-yellow-400' : 'text-gray-200'}`}>
-                                {req} جهاز
+                                {req} {t('practice.vlsm.hosts')}
                             </span>
                         ))}
                     </div>
                 </div>
-                <p className="text-xl text-center text-gray-200 mb-6">
-                    باستخدام VLSM، ما هو <strong className="text-cyan-400">عنوان الشبكة</strong> و <strong className="text-cyan-400">CIDR</strong> للشبكة المخصصة لمتطلب <strong className="text-yellow-400">{question.vlsmTargetRequirement} جهاز</strong>؟
-                    <br/>
-                    <span className="text-sm text-gray-500">(تذكر: في VLSM، ابدأ دائمًا بالمتطلب الأكبر)</span>
-                </p>
+                <p className="text-xl text-center text-gray-200 mb-6" dangerouslySetInnerHTML={{ __html: t('practice.vlsm.prompt', { requirement: `<strong class="text-yellow-400">${question.vlsmTargetRequirement} ${t('practice.vlsm.hosts')}</strong>`}) }}></p>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div>
-                        <label htmlFor="networkAddress" className="block mb-2 text-sm font-medium text-gray-300">عنوان الشبكة</label>
+                        <label htmlFor="networkAddress" className="block mb-2 text-sm font-medium text-gray-300">{t('practice.fields.networkAddress')}</label>
                         <input
                             type="text"
                             id="networkAddress"
@@ -345,7 +331,7 @@ const PracticeSection: React.FC = () => {
                          {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{vlsmCorrectAnswer.networkAddress}</p>}
                     </div>
                      <div>
-                        <label htmlFor="cidr" className="block mb-2 text-sm font-medium text-gray-300">CIDR (مثال: /26)</label>
+                        <label htmlFor="cidr" className="block mb-2 text-sm font-medium text-gray-300">{t('practice.fields.cidrLabel')}</label>
                         <input
                             type="text"
                             id="cidr"
@@ -371,14 +357,14 @@ const PracticeSection: React.FC = () => {
         const { rules, packet } = question.acl;
         return (
             <div className="max-w-2xl mx-auto">
-                <p className="text-xl text-center text-gray-200 mb-4">بالنظر إلى قائمة التحكم (ACL) أدناه، هل سيتم السماح أم رفض الحزمة التالية؟</p>
+                <p className="text-xl text-center text-gray-200 mb-4">{t('practice.acl.prompt')}</p>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-gray-900 p-4 rounded-lg">
-                        <h4 className="font-bold text-lg text-cyan-400 mb-2">قائمة التحكم</h4>
-                        <pre className="bg-black text-cyan-300 p-3 rounded-md font-mono text-sm">{rules.join('\n')}<br/><span className="text-red-500/50">(implicit deny any)</span></pre>
+                        <h4 className="font-bold text-lg text-cyan-400 mb-2">{t('practice.acl.aclTitle')}</h4>
+                        <pre className="bg-black text-cyan-300 p-3 rounded-md font-mono text-sm">{rules.join('\n')}<br/><span className="text-red-500/50">({t('practice.acl.implicitDeny')})</span></pre>
                     </div>
                     <div className="bg-gray-900 p-4 rounded-lg">
-                         <h4 className="font-bold text-lg text-cyan-400 mb-2">الحزمة</h4>
+                         <h4 className="font-bold text-lg text-cyan-400 mb-2">{t('practice.acl.packetTitle')}</h4>
                          <ul className="font-mono text-sm space-y-1">
                              <li><span className="text-gray-400">Src IP:</span> <span className="text-yellow-300">{packet.srcIp}</span></li>
                              <li><span className="text-gray-400">Dst IP:</span> <span className="text-yellow-300">{packet.dstIp}</span></li>
@@ -393,12 +379,12 @@ const PracticeSection: React.FC = () => {
                             isAnswered ? (correctAclAnswer === answer ? 'bg-green-600 text-white ring-green-400' : 'bg-red-600 text-white ring-red-400') 
                                        : (answer === 'Permit' ? 'bg-green-700 hover:bg-green-600' : 'bg-red-700 hover:bg-red-600')
                         } ${userAclAnswer === answer && !isAnswered ? 'ring-cyan-400' : 'ring-transparent'}`}>
-                            {answer === 'Permit' ? 'السماح' : 'الرفض'}
+                            {t(`practice.acl.${answer.toLowerCase()}`)}
                         </button>
                     ))}
                 </div>
-                {isAnswered && aclFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">تذكر أن القواعد تعالج بالترتيب وتتوقف عند أول تطابق.</p>}
-                {showSolution && <p className="mt-4 text-lg text-center font-bold" style={{color: correctAclAnswer === 'Permit' ? '#4ade80' : '#f87171'}}>الحل الصحيح: {correctAclAnswer === 'Permit' ? 'السماح' : 'الرفض'}</p>}
+                {isAnswered && aclFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">{t('practice.feedback.acl')}</p>}
+                {showSolution && <p className="mt-4 text-lg text-center font-bold" style={{color: correctAclAnswer === 'Permit' ? '#4ade80' : '#f87171'}}>{t('practice.correctSolution')}: {t(`practice.acl.${correctAclAnswer?.toLowerCase()}`)}</p>}
             </div>
         );
     };
@@ -408,7 +394,7 @@ const PracticeSection: React.FC = () => {
         const { switches } = question.stp;
         return (
             <div className="max-w-3xl mx-auto">
-                <p className="text-xl text-center text-gray-200 mb-6">بالنظر إلى المحولات التالية، أي منها سيتم انتخابه كـ <strong className="text-cyan-400">جسر جذري (Root Bridge)</strong>؟</p>
+                <p className="text-xl text-center text-gray-200 mb-6">{t('practice.stp.prompt')}</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {switches.map(sw => (
                         <div key={sw.name} className={`p-4 rounded-lg text-center border-2 transition-all ${userStpAnswer === sw.name ? 'border-cyan-400 bg-cyan-900/50' : 'border-gray-700 bg-gray-900'}`}>
@@ -430,8 +416,8 @@ const PracticeSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
-                 {isAnswered && stpFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">يتم انتخاب الجسر الجذري بناءً على أقل أولوية، ثم أقل عنوان MAC في حالة التعادل.</p>}
-                {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctStpAnswer}</p>}
+                 {isAnswered && stpFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">{t('practice.feedback.stp')}</p>}
+                {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">{t('practice.correctSolution')}: {correctStpAnswer}</p>}
             </div>
         );
     };
@@ -441,7 +427,7 @@ const PracticeSection: React.FC = () => {
         const { text, options } = question.protocol;
         return (
             <div className="max-w-xl mx-auto">
-                <p className="text-xl text-center text-gray-200 mb-6">{text}</p>
+                <p className="text-xl text-center text-gray-200 mb-6">{t(text)}</p>
                 <div className="grid grid-cols-2 gap-4">
                     {options.map(option => (
                         <button key={option} onClick={() => !isAnswered && setUserProtocolAnswer(option)} disabled={isAnswered} className={`p-4 font-semibold text-lg rounded-lg text-center transition-all disabled:cursor-not-allowed ${userProtocolAnswer === option ? 'ring-2 ring-offset-2 ring-offset-gray-800' : ''} ${
@@ -452,15 +438,15 @@ const PracticeSection: React.FC = () => {
                         </button>
                     ))}
                 </div>
-                {isAnswered && protocolFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">الإجابة الصحيحة هي: {correctProtocolAnswer}</p>}
-                 {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctProtocolAnswer}</p>}
+                {isAnswered && protocolFeedback === false && <p className="mt-2 text-center text-red-400 text-sm">{t('practice.feedback.protocol', { answer: correctProtocolAnswer || '' })}</p>}
+                 {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">{t('practice.correctSolution')}: {correctProtocolAnswer}</p>}
             </div>
         );
     };
 
     const renderTestMode = () => {
         if (!question) {
-            return <div className="text-center p-8">جاري تحميل السؤال...</div>;
+            return <div className="text-center p-8">{t('practice.loading')}</div>;
         }
         
         const curriculumTabs: { id: CurriculumLevel; label: string }[] = [
@@ -471,7 +457,7 @@ const PracticeSection: React.FC = () => {
 
         return (
             <div>
-                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">اختبر معلوماتك</h2>
+                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">{t('practice.testMode')}</h2>
 
                 <div className="flex justify-center border-b border-gray-600 mb-6">
                     {curriculumTabs.map(tab => (
@@ -490,34 +476,35 @@ const PracticeSection: React.FC = () => {
                 </div>
 
                 <div className="max-w-md mx-auto bg-gray-900/50 rounded-lg p-3 mb-6 flex justify-around items-center">
-                    <div className="text-center"><span className="text-sm text-gray-400">صحيحة</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
-                    <div className="text-center"><span className="text-sm text-gray-400">خاطئة</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
-                    <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">تصفير</button>
+                    <div className="text-center"><span className="text-sm text-gray-400">{t('practice.stats.correct')}</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
+                    <div className="text-center"><span className="text-sm text-gray-400">{t('practice.stats.incorrect')}</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
+                    <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">{t('practice.stats.reset')}</button>
                 </div>
                 
                 <div className="min-h-[300px] flex flex-col justify-center">
                     {
                         (() => {
                             if (!question) return null;
+                            const { ipAddress, cidr, requiredHosts } = question;
                             switch (question.type) {
                                 case QuestionType.FULL_DETAILS: return renderFullDetailsQuestion();
-                                case QuestionType.HOW_MANY_SUBNETS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الشبكات الفرعية التي يمكن إنشاؤها؟`);
-                                case QuestionType.HOW_MANY_HOSTS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الأجهزة الصالحة للاستخدام في كل شبكة فرعية؟`);
-                                case QuestionType.SCENARIO_CIDR_FOR_HOSTS: return renderSingleAnswerQuestion(`شركة تحتاج إلى شبكة تتسع لـ ${question.requiredHosts} موظفًا. ما هو أفضل وأكفأ قناع شبكة بصيغة CIDR (مثال: /26) يمكن استخدامه؟`);
+                                case QuestionType.HOW_MANY_SUBNETS: return renderSingleAnswerQuestion(t('practice.questions.how_many_subnets', { ip: ipAddress, cidr }));
+                                case QuestionType.HOW_MANY_HOSTS: return renderSingleAnswerQuestion(t('practice.questions.how_many_hosts', { ip: ipAddress, cidr }));
+                                case QuestionType.SCENARIO_CIDR_FOR_HOSTS: return renderSingleAnswerQuestion(t('practice.questions.scenario_cidr_for_hosts', { hosts: requiredHosts }));
                                 case QuestionType.VLSM_SCENARIO: return renderVlsmQuestion();
                                 case QuestionType.ACL_EVALUATION: return renderAclQuestion();
                                 case QuestionType.STP_ROOT_BRIDGE: return renderStpQuestion();
                                 case QuestionType.PROTOCOL_IDENTIFICATION: return renderProtocolIdQuestion();
-                                default: return <p>حدث خطأ غير متوقع.</p>;
+                                default: return <p>{t('practice.unexpectedError')}</p>;
                             }
                         })()
                     }
                 </div>
                 
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                     <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">تحقق من الإجابة</button>
-                    <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? 'إخفاء الحل' : 'أظهر الحل'}</button>
-                    <button onClick={() => newQuestion(activeCurriculum)} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
+                     <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">{t('practice.buttons.check')}</button>
+                    <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? t('practice.buttons.hideSolution') : t('practice.buttons.showSolution')}</button>
+                    <button onClick={() => newQuestion(activeCurriculum)} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{t('practice.buttons.newQuestion')}</button>
                 </div>
             </div>
         )
@@ -525,20 +512,20 @@ const PracticeSection: React.FC = () => {
 
     const renderCalculatorMode = () => {
         const solutionEntries = customSolution ? [
-            { label: 'عنوان الشبكة', value: customSolution.networkAddress },
-            { label: 'قناع الشبكة', value: customSolution.subnetMask },
-            { label: 'عنوان البث', value: customSolution.broadcastAddress },
+            { label: t('practice.fields.networkAddress'), value: customSolution.networkAddress },
+            { label: t('practice.fields.subnetMask'), value: customSolution.subnetMask },
+            { label: t('practice.fields.broadcastAddress'), value: customSolution.broadcastAddress },
             { label: 'CIDR', value: `/${customCidr}` },
-            { label: 'قناع الوايلد كارد', value: customSolution.wildcardMask },
-            { label: 'عدد الأجهزة المتاحة', value: customSolution.numberOfHosts },
-            { label: 'أول IP صالح', value: customSolution.firstUsableHost },
-            { label: 'آخر IP صالح', value: customSolution.lastUsableHost },
+            { label: t('practice.fields.wildcard'), value: customSolution.wildcardMask },
+            { label: t('practice.fields.numHosts'), value: customSolution.numberOfHosts },
+            { label: t('practice.fields.firstUsable'), value: customSolution.firstUsableHost },
+            { label: t('practice.fields.lastUsable'), value: customSolution.lastUsableHost },
         ] : [];
 
         return (
             <div>
-                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">حاسبة الشبكات الفرعية</h2>
-                <p className="text-center text-gray-400 mb-8">أدخل عنوان IP و CIDR لحساب تفاصيل الشبكة الفرعية.</p>
+                <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">{t('practice.calculator.title')}</h2>
+                <p className="text-center text-gray-400 mb-8">{t('practice.calculator.subtitle')}</p>
                 
                 <div className="max-w-xl mx-auto bg-gray-900/50 p-6 rounded-lg">
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
@@ -561,7 +548,7 @@ const PracticeSection: React.FC = () => {
                         />
                     </div>
                     <button onClick={handleCalculate} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
-                        احسب
+                        {t('practice.calculator.calculateButton')}
                     </button>
                 </div>
 
@@ -569,7 +556,7 @@ const PracticeSection: React.FC = () => {
 
                 {customSolution && (
                     <div className="mt-8 max-w-3xl mx-auto animate-fade-in">
-                        <h3 className="text-2xl font-semibold text-white mb-4 text-center">النتائج لـ <span className="text-yellow-400 font-mono">{customIp}/{customCidr}</span></h3>
+                        <h3 className="text-2xl font-semibold text-white mb-4 text-center">{t('practice.calculator.resultsTitle')} <span className="text-yellow-400 font-mono">{customIp}/{customCidr}</span></h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900 p-6 rounded-lg">
                             {solutionEntries.map(entry => (
                                 <div key={entry.label} className="bg-gray-800 p-3 rounded-md">
@@ -593,7 +580,7 @@ const PracticeSection: React.FC = () => {
                         practiceMode === 'test' ? 'border-b-2 border-cyan-400 text-cyan-400' : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    اختبر معلوماتك
+                    {t('practice.testMode')}
                 </button>
                  <button
                     onClick={() => setPracticeMode('calculator')}
@@ -601,7 +588,7 @@ const PracticeSection: React.FC = () => {
                         practiceMode === 'calculator' ? 'border-b-2 border-cyan-400 text-cyan-400' : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    حاسبة الشبكات
+                    {t('practice.calculatorMode')}
                 </button>
             </div>
             {practiceMode === 'test' ? renderTestMode() : renderCalculatorMode()}

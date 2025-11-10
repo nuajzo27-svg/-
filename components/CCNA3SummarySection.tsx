@@ -261,6 +261,63 @@ const Chapter3: React.FC = () => (
             </ul>
         </section>
         <section>
+            <h4 className="text-2xl font-bold text-white mb-3">تأمين منافذ المحول (Switch Port Security)</h4>
+            <p>
+                هي ميزة أساسية في الطبقة الثانية للحماية من هجمات إغراق جدول MAC والوصول غير المصرح به. تقوم بتقييد الإدخال إلى واجهة المحول عن طريق تحديد عناوين MAC المسموح لها باستخدام المنفذ.
+            </p>
+            <ul className="list-disc list-inside space-y-2 bg-gray-900 p-4 rounded-md">
+                <li><strong className="text-cyan-400">Violation Modes (أوضاع الانتهاك):</strong> تحدد ما يجب فعله عند حدوث انتهاك.
+                    <ul className="list-[circle] list-inside ml-5 mt-1 text-sm">
+                        <li><strong>Shutdown (الافتراضي):</strong> يضع المنفذ في حالة `err-disabled`.</li>
+                        <li><strong>Restrict:</strong> يسقط حزم المهاجم ويزيد عداد الانتهاك ويرسل تنبيه Syslog.</li>
+                        <li><strong>Protect:</strong> يسقط حزم المهاجم بصمت دون إرسال تنبيه.</li>
+                    </ul>
+                </li>
+                <li><strong className="text-cyan-400">Sticky MAC Addresses:</strong> تسمح للمحول بتعلم عناوين MAC ديناميكيًا وحفظها في التكوين الجاري (running configuration)، مما يسهل الإدارة.</li>
+            </ul>
+            <CodeBlock>
+{`! Enable port security on an access port
+SW1(config)# interface FastEthernet0/1
+SW1(config-if)# switchport mode access
+SW1(config-if)# switchport port-security
+
+! Set violation mode and learn MAC address dynamically
+SW1(config-if)# switchport port-security violation restrict
+SW1(config-if)# switchport port-security mac-address sticky
+
+! Verify the configuration
+SW1# show port-security interface FastEthernet0/1`}
+            </CodeBlock>
+        </section>
+        <section>
+            <h4 className="text-2xl font-bold text-white mb-3">الحماية من هجمات DHCP (DHCP Snooping)</h4>
+            <p>
+                هي ميزة أمان تقوم بالتحقق من صحة رسائل DHCP على الشبكة للحماية من خوادم DHCP المزيفة. تعمل عن طريق تصنيف المنافذ إلى:
+            </p>
+            <ul className="list-disc list-inside space-y-2">
+                <li><strong className="text-green-400">Trusted (موثوق):</strong> منفذ يتصل به خادم DHCP شرعي. يُسمح لرسائل عرض DHCP (Offer) بالمرور.</li>
+                <li><strong className="text-red-400">Untrusted (غير موثوق):</strong> أي منفذ آخر (عادة يتصل به المستخدمون). يتم حظر رسائل عرض DHCP التي تأتي من هذه المنافذ.</li>
+            </ul>
+            <p className="mt-2">
+                بالإضافة إلى ذلك، يقوم DHCP Snooping ببناء جدول ربط (binding table) يحتوي على عنوان MAC وعنوان IP ومعلومات أخرى للأجهزة الشرعية، وهو أساسي لعمل ميزات أمان أخرى مثل Dynamic ARP Inspection (DAI).
+            </p>
+            <CodeBlock>
+{`! Enable DHCP Snooping globally
+SW1(config)# ip dhcp snooping
+
+! Enable DHCP Snooping for specific VLANs
+SW1(config)# ip dhcp snooping vlan 10,20
+
+! Configure the port connected to the legitimate DHCP server as trusted
+SW1(config)# interface GigabitEthernet0/1
+SW1(config-if)# ip dhcp snooping trust
+
+! (Optional) Limit the rate of DHCP messages on untrusted ports
+SW1(config)# interface FastEthernet0/1
+SW1(config-if)# ip dhcp snooping limit rate 15`}
+            </CodeBlock>
+        </section>
+        <section>
             <h4 className="text-2xl font-bold text-white mb-3">أسئلة مراجعة للفصل الثالث</h4>
              <ol className="list-decimal list-inside space-y-3 bg-gray-950 p-5 rounded-lg border border-gray-700">
                 <li>ما هو الدافع الرئيسي لمجرمي الإنترنت (Cybercriminals)؟</li>

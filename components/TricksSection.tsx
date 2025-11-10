@@ -1,4 +1,5 @@
 import React from 'react';
+import { useI18n } from '../hooks/useI18n';
 
 const TrickCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden transition-all duration-300 ease-in-out hover:border-cyan-500/50 hover:-translate-y-1 hover:shadow-lg hover:shadow-cyan-500/10">
@@ -11,6 +12,7 @@ const TrickCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
 
 
 const CidrTable = () => {
+    const { t } = useI18n();
     const data = [
         { cidr: '/24', mask: '255.255.255.0', hosts: 254 },
         { cidr: '/25', mask: '255.255.255.128', hosts: 126 },
@@ -22,12 +24,12 @@ const CidrTable = () => {
     ];
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-300 bg-gray-950 rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-300 bg-gray-950 rounded-lg">
                 <thead className="text-xs text-cyan-300 uppercase bg-gray-700/50">
                     <tr>
                         <th scope="col" className="px-6 py-3">CIDR</th>
-                        <th scope="col" className="px-6 py-3">Subnet Mask</th>
-                        <th scope="col" className="px-6 py-3">Usable Hosts</th>
+                        <th scope="col" className="px-6 py-3">{t('tricks.table.header2')}</th>
+                        <th scope="col" className="px-6 py-3">{t('tricks.table.header3')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,96 +47,97 @@ const CidrTable = () => {
 };
 
 const TricksSection: React.FC = () => {
+    const { t } = useI18n();
     return (
         <div>
-            <h2 className="text-3xl font-bold text-cyan-400 mb-6">أسرار الحل السريع (بمجرد النظر)</h2>
+            <h2 className="text-3xl font-bold text-cyan-400 mb-6">{t('tricks.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <TrickCard title="1. الرقم السحري (Magic Number)">
-                    <p>الرقم السحري هو مفتاحك لإيجاد عناوين الشبكات بسرعة. إنه ببساطة <strong>256</strong>.</p>
-                    <p>لحساب حجم البلوك (Block Size) أو القفزة بين كل شبكة وأخرى، اطرح قيمة الخانة المثيرة للاهتمام في قناع الشبكة من 256.</p>
-                    <p><strong>مثال:</strong> قناع شبكة <span className="font-mono text-yellow-400">/26</span> هو <span className="font-mono text-yellow-400">255.255.255.192</span>.</p>
-                    <p>الخانة المثيرة للاهتمام هي 192.
+                <TrickCard title={t('tricks.card1.title')}>
+                    <p>{t('tricks.card1.p1')}</p>
+                    <p>{t('tricks.card1.p2')}</p>
+                    <p><strong>{t('tricks.example')}:</strong> {t('tricks.card1.example_p1')}</p>
+                    <p>{t('tricks.card1.example_p2')}
                     <br />
-                    حجم البلوك = <span className="font-mono text-green-400">256 - 192 = 64</span>.</p>
-                    <p>هذا يعني أن الشبكات ستبدأ من 0, 64, 128, 192.</p>
+                    {t('tricks.card1.example_p3')}</p>
+                    <p>{t('tricks.card1.example_p4')}</p>
                 </TrickCard>
 
-                <TrickCard title="2. تحديد الخانة المثيرة للاهتمام">
-                     <p>هي الخانة (Octet) في قناع الشبكة التي قيمتها ليست 255 وليست 0.</p>
+                <TrickCard title={t('tricks.card2.title')}>
+                     <p>{t('tricks.card2.p1')}</p>
                      <ul className="list-disc list-inside my-2">
-                         <li>قناع <span className="font-mono text-yellow-400">255.255.192.0</span>  (<span className="font-mono text-yellow-400">/18</span>): الخانة المثيرة هي الثالثة (192).</li>
-                         <li>قناع <span className="font-mono text-yellow-400">255.255.255.240</span> (<span className="font-mono text-yellow-400">/28</span>): الخانة المثيرة هي الرابعة (240).</li>
+                         <li>{t('tricks.card2.li1')}</li>
+                         <li>{t('tricks.card2.li2')}</li>
                     </ul>
-                    <p>هذه هي الخانة التي ستتغير فيها عناوين الشبكات الفرعية.</p>
+                    <p>{t('tricks.card2.p2')}</p>
                 </TrickCard>
                 
                 <div className="md:col-span-2">
-                    <TrickCard title="3. ورقة الغش: الإجابات السحرية الخمس">
-                        <p>لكل سؤال في تقسيم الشبكات، هناك صيغة سحرية. مثالنا الدائم: شبكة Class C بقناع <span className="font-mono text-yellow-400">/26</span>.</p>
+                    <TrickCard title={t('tricks.card3.title')}>
+                        <p>{t('tricks.card3.p1')}</p>
                          <ul className="space-y-4 mt-4 list-none">
                             <li>
-                                <strong className="text-white text-lg">1. كم عدد الشبكات؟ (How many networks)</strong>
-                                <p className="font-mono text-cyan-400 mt-1">الصيغة السحرية: 2 <sup>(البتات المستعارة)</sup></p>
+                                <strong className="text-white text-lg">{t('tricks.card3.q1_title')}</strong>
+                                <p className="font-mono text-cyan-400 mt-1">{t('tricks.card3.q1_formula')}</p>
                                 <p className="text-gray-300">
-                                    <span className="font-bold text-green-400 text-lg">← 2 <sup>(26-24)</sup> = 2<sup>2</sup> = 4 شبكات</span>
+                                    <span className="font-bold text-green-400 text-lg">← 2 <sup>(26-24)</sup> = 2<sup>2</sup> = {t('tricks.card3.q1_result')}</span>
                                 </p>
                             </li>
                              <li>
-                                <strong className="text-white text-lg">2. كم عدد الأجهزة؟ (How many hosts)</strong>
-                                <p className="font-mono text-cyan-400 mt-1">الصيغة السحرية: 2 <sup>(بتات المضيف)</sup> - 2</p>
+                                <strong className="text-white text-lg">{t('tricks.card3.q2_title')}</strong>
+                                <p className="font-mono text-cyan-400 mt-1">{t('tricks.card3.q2_formula')}</p>
                                 <p className="text-gray-300">
-                                    <span className="font-bold text-green-400 text-lg">← 2 <sup>(32-26)</sup> - 2 = 2<sup>6</sup> - 2 = 62 جهاز</span>
+                                    <span className="font-bold text-green-400 text-lg">← 2 <sup>(32-26)</sup> - 2 = 2<sup>6</sup> - 2 = {t('tricks.card3.q2_result')}</span>
                                 </p>
                             </li>
                             <li>
-                                <strong className="text-white text-lg">3. ما هي الشبكات الصالحة؟ (Valid subnets)</strong>
-                                <p className="font-mono text-cyan-400 mt-1">الصيغة السحرية: 256 - الخانة المثيرة = حجم البلوك</p>
+                                <strong className="text-white text-lg">{t('tricks.card3.q3_title')}</strong>
+                                <p className="font-mono text-cyan-400 mt-1">{t('tricks.card3.q3_formula')}</p>
                                 <p className="text-gray-300">
-                                    <span className="font-bold text-green-400 text-lg font-mono">← 256 - 192 = 64. الشبكات: .0, .64, .128, .192</span>
+                                    <span className="font-bold text-green-400 text-lg font-mono">← 256 - 192 = 64. {t('tricks.card3.q3_result')}</span>
                                 </p>
                             </li>
                              <li>
-                                <strong className="text-white text-lg">4. ما هو عنوان البث؟ (Broadcast address)</strong>
-                                <p className="font-mono text-cyan-400 mt-1">الصيغة السحرية: عنوان الشبكة التالية - 1</p>
+                                <strong className="text-white text-lg">{t('tricks.card3.q4_title')}</strong>
+                                <p className="font-mono text-cyan-400 mt-1">{t('tricks.card3.q4_formula')}</p>
                                 <p className="text-gray-300">
-                                    <span className="font-bold text-green-400 text-lg font-mono">← لشبكة .64، البث هو .127</span>
+                                    <span className="font-bold text-green-400 text-lg font-mono">← {t('tricks.card3.q4_result')}</span>
                                 </p>
                             </li>
                              <li>
-                                <strong className="text-white text-lg">5. ما هي الأجهزة الصالحة؟ (Valid hosts)</strong>
-                                <p className="font-mono text-cyan-400 mt-1">الصيغة السحرية: (عنوان الشبكة + 1) إلى (عنوان البث - 1)</p>
+                                <strong className="text-white text-lg">{t('tricks.card3.q5_title')}</strong>
+                                <p className="font-mono text-cyan-400 mt-1">{t('tricks.card3.q5_formula')}</p>
                                  <p className="text-gray-300">
-                                    <span className="font-bold text-green-400 text-lg font-mono">← لشبكة .64، الأجهزة هي من .65 إلى .126</span>
+                                    <span className="font-bold text-green-400 text-lg font-mono">← {t('tricks.card3.q5_result')}</span>
                                 </p>
                             </li>
                         </ul>
                     </TrickCard>
                 </div>
 
-                <TrickCard title="4. القاعدة الذهبية لتخطيط VLSM">
-                    <p>عندما تحتاج إلى تقسيم شبكة لتلبية متطلبات مختلفة الأحجام (مثل قسم يحتاج 100 جهاز وآخر يحتاج 10)، استخدم دائمًا هذه القاعدة:</p>
-                    <p className="text-center font-bold text-xl my-4 p-4 bg-gray-950 rounded-md text-yellow-400">ابدأ دائمًا بالشبكة الأكبر أولاً!</p>
-                    <p>قم بتخصيص الشبكة الفرعية التي تتطلب أكبر عدد من الأجهزة أولاً، ثم انتقل إلى الأصغر فالأصغر. هذا الأسلوب يضمن عدم تداخل الشبكات ويجعل عملية التخطيط منظمة وسهلة.</p>
+                <TrickCard title={t('tricks.card4.title')}>
+                    <p>{t('tricks.card4.p1')}</p>
+                    <p className="text-center font-bold text-xl my-4 p-4 bg-gray-950 rounded-md text-yellow-400">{t('tricks.card4.rule')}</p>
+                    <p>{t('tricks.card4.p2')}</p>
                 </TrickCard>
                 
                 <div className="md:col-span-2">
-                    <TrickCard title="5. جدول CIDR السريع (لشبكات Class C)">
-                        <p>احفظ هذا الجدول عن ظهر قلب، وسوف تتمكن من حل معظم أسئلة Class C بمجرد النظر.</p>
+                    <TrickCard title={t('tricks.card5.title')}>
+                        <p>{t('tricks.card5.p1')}</p>
                         <div className="mt-4">
                             <CidrTable />
                         </div>
                     </TrickCard>
                 </div>
 
-                <TrickCard title="6. طريقة الأصابع (Finger Method)">
-                    <p>يمكنك استخدام أصابعك لتذكر قوى العدد 2 بسرعة.</p>
-                    <p>ابدأ من اليمين إلى اليسار، كل إصبع يمثل قوة للرقم 2:</p>
+                <TrickCard title={t('tricks.card6.title')}>
+                    <p>{t('tricks.card6.p1')}</p>
+                    <p>{t('tricks.card6.p2')}</p>
                     <p className="font-mono text-yellow-400 text-center tracking-widest text-lg p-4 bg-gray-950 rounded-md">
                         128 &nbsp; 64 &nbsp; 32 &nbsp; 16 &nbsp; 8 &nbsp; 4 &nbsp; 2 &nbsp; 1
                     </p>
-                    <p>للحصول على قيمة قناع الشبكة مثل <span className="font-mono text-yellow-400">/27</span>، فأنت تحتاج 3 بتات في الخانة الأخيرة (لأن 24 بت في الخانات الثلاث الأولى).
+                    <p>{t('tricks.card6.p3')}
                     <br/>
-                    هذا يعني أول 3 بتات من اليسار: <span className="font-mono text-green-400">128 + 64 + 32 = 224</span>. إذن القناع هو <span className="font-mono text-green-400">255.255.255.224</span>.</p>
+                    {t('tricks.card6.p4')}</p>
                 </TrickCard>
             </div>
         </div>
