@@ -1,130 +1,139 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { QuestionType, SubnettingQuestion, SubnettingSolution } from '../types';
-import { generateRandomQuestion, calculateSubnetDetails, calculateCidrForHosts, calculateVlsmLayout } from '../services/subnettingCalculator';
+import { generateRandomQuestion, calculateSubnetDetails, calculateCidrForHosts, calculateVlsmLayout, evaluateAcl, findStpRootBridge, getProtocolAnswer } from '../services/subnettingCalculator';
 
-type UserAnswers = {
-    [K in keyof Omit<SubnettingSolution, 'wildcardMask' | 'totalSubnets'>]?: string;
-};
-
-type Feedback = {
-    [K in keyof UserAnswers]?: boolean;
-};
+// --- State Types ---
+type UserSubnettingAnswers = { [K in keyof Omit<SubnettingSolution, 'wildcardMask' | 'totalSubnets'>]?: string; };
+type SubnettingFeedback = { [K in keyof UserSubnettingAnswers]?: boolean; };
 
 const PracticeSection: React.FC = () => {
+    // --- State ---
     const [question, setQuestion] = useState<SubnettingQuestion | null>(null);
-    const [solution, setSolution] = useState<SubnettingSolution | null>(null);
-    const [correctSingleAnswer, setCorrectSingleAnswer] = useState<string | number>('');
-    const [vlsmCorrectAnswer, setVlsmCorrectAnswer] = useState({ networkAddress: '', cidr: '' });
-
-    const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
-    const [userSingleAnswer, setUserSingleAnswer] = useState('');
-    const [vlsmUserAnswer, setVlsmUserAnswer] = useState({ networkAddress: '', cidr: '' });
-
-    const [feedback, setFeedback] = useState<Feedback>({});
-    const [singleFeedback, setSingleFeedback] = useState<boolean | undefined>(undefined);
-    const [vlsmFeedback, setVlsmFeedback] = useState<{ networkAddress?: boolean; cidr?: boolean }>({});
-
     const [showSolution, setShowSolution] = useState(false);
     const [isAnswered, setIsAnswered] = useState(false);
     const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
 
+    // Subnetting State
+    const [subnettingSolution, setSubnettingSolution] = useState<SubnettingSolution | null>(null);
+    const [correctSingleAnswer, setCorrectSingleAnswer] = useState<string | number>('');
+    const [vlsmCorrectAnswer, setVlsmCorrectAnswer] = useState({ networkAddress: '', cidr: '' });
+    const [userSubnettingAnswers, setUserSubnettingAnswers] = useState<UserSubnettingAnswers>({});
+    const [userSingleAnswer, setUserSingleAnswer] = useState('');
+    const [vlsmUserAnswer, setVlsmUserAnswer] = useState({ networkAddress: '', cidr: '' });
+    const [subnettingFeedback, setSubnettingFeedback] = useState<SubnettingFeedback>({});
+    const [singleFeedback, setSingleFeedback] = useState<boolean | undefined>(undefined);
+    const [vlsmFeedback, setVlsmFeedback] = useState<{ networkAddress?: boolean; cidr?: boolean }>({});
+    
+    // New Question Types State
+    const [correctAclAnswer, setCorrectAclAnswer] = useState<'Permit' | 'Deny' | null>(null);
+    const [userAclAnswer, setUserAclAnswer] = useState<'Permit' | 'Deny' | null>(null);
+    const [aclFeedback, setAclFeedback] = useState<boolean | undefined>(undefined);
+
+    const [correctStpAnswer, setCorrectStpAnswer] = useState<string | null>(null);
+    const [userStpAnswer, setUserStpAnswer] = useState<string | null>(null);
+    const [stpFeedback, setStpFeedback] = useState<boolean | undefined>(undefined);
+
+    const [correctProtocolAnswer, setCorrectProtocolAnswer] = useState<string | null>(null);
+    const [userProtocolAnswer, setUserProtocolAnswer] = useState<string | null>(null);
+    const [protocolFeedback, setProtocolFeedback] = useState<boolean | undefined>(undefined);
+
+    // --- Effects ---
     useEffect(() => {
         const savedStats = localStorage.getItem('subnetting-stats');
-        if (savedStats) {
-            setStats(JSON.parse(savedStats));
-        }
+        if (savedStats) setStats(JSON.parse(savedStats));
     }, []);
 
     const newQuestion = useCallback(() => {
         const q = generateRandomQuestion();
         setQuestion(q);
 
-        // Reset all states for the new question
-        setSolution(null);
-        setCorrectSingleAnswer('');
-        setVlsmCorrectAnswer({ networkAddress: '', cidr: '' });
-        setUserAnswers({});
-        setUserSingleAnswer('');
-        setVlsmUserAnswer({ networkAddress: '', cidr: '' });
-        setFeedback({});
-        setSingleFeedback(undefined);
-        setVlsmFeedback({});
+        // Reset all states
         setShowSolution(false);
         setIsAnswered(false);
+        
+        // Reset subnetting
+        setSubnettingSolution(null);
+        setCorrectSingleAnswer('');
+        setVlsmCorrectAnswer({ networkAddress: '', cidr: '' });
+        setUserSubnettingAnswers({});
+        setUserSingleAnswer('');
+        setVlsmUserAnswer({ networkAddress: '', cidr: '' });
+        setSubnettingFeedback({});
+        setSingleFeedback(undefined);
+        setVlsmFeedback({});
 
-        if (q.ipAddress && typeof q.cidr !== 'undefined') {
-            const sol = calculateSubnetDetails(q.ipAddress, q.cidr);
-            setSolution(sol);
-            if (q.type === QuestionType.HOW_MANY_HOSTS) {
-                setCorrectSingleAnswer(sol.numberOfHosts);
-            } else if (q.type === QuestionType.HOW_MANY_SUBNETS) {
-                setCorrectSingleAnswer(sol.totalSubnets);
-            }
-        } else if (q.type === QuestionType.SCENARIO_CIDR_FOR_HOSTS && q.requiredHosts) {
-            const answer = calculateCidrForHosts(q.requiredHosts);
-            setCorrectSingleAnswer(`/${answer}`);
-        } else if (q.type === QuestionType.VLSM_SCENARIO && q.baseNetwork && typeof q.baseCidr !== 'undefined' && q.vlsmHostRequirements && typeof q.vlsmTargetRequirement !== 'undefined') {
-            const layout = calculateVlsmLayout(q.baseNetwork, q.baseCidr, q.vlsmHostRequirements);
-            if (layout) {
-                const solutionForTarget = layout.find(l => l.requirement === q.vlsmTargetRequirement);
-                if (solutionForTarget) {
-                    setVlsmCorrectAnswer({
-                        networkAddress: solutionForTarget.networkAddress,
-                        cidr: `/${solutionForTarget.cidr}`
-                    });
+        // Reset new types
+        setCorrectAclAnswer(null);
+        setUserAclAnswer(null);
+        setAclFeedback(undefined);
+        setCorrectStpAnswer(null);
+        setUserStpAnswer(null);
+        setStpFeedback(undefined);
+        setCorrectProtocolAnswer(null);
+        setUserProtocolAnswer(null);
+        setProtocolFeedback(undefined);
+
+
+        // Calculate solutions for the new question
+        switch (q.type) {
+            case QuestionType.FULL_DETAILS:
+            case QuestionType.HOW_MANY_HOSTS:
+            case QuestionType.HOW_MANY_SUBNETS:
+                if (q.ipAddress && typeof q.cidr !== 'undefined') {
+                    const sol = calculateSubnetDetails(q.ipAddress, q.cidr);
+                    setSubnettingSolution(sol);
+                    if (q.type === QuestionType.HOW_MANY_HOSTS) setCorrectSingleAnswer(sol.numberOfHosts);
+                    else if (q.type === QuestionType.HOW_MANY_SUBNETS) setCorrectSingleAnswer(sol.totalSubnets);
                 }
-            }
+                break;
+            case QuestionType.SCENARIO_CIDR_FOR_HOSTS:
+                if(q.requiredHosts) setCorrectSingleAnswer(`/${calculateCidrForHosts(q.requiredHosts)}`);
+                break;
+            case QuestionType.VLSM_SCENARIO:
+                if (q.baseNetwork && typeof q.baseCidr !== 'undefined' && q.vlsmHostRequirements && typeof q.vlsmTargetRequirement !== 'undefined') {
+                    const layout = calculateVlsmLayout(q.baseNetwork, q.baseCidr, q.vlsmHostRequirements);
+                    const solutionForTarget = layout?.find(l => l.requirement === q.vlsmTargetRequirement);
+                    if (solutionForTarget) {
+                        setVlsmCorrectAnswer({ networkAddress: solutionForTarget.networkAddress, cidr: `/${solutionForTarget.cidr}` });
+                    }
+                }
+                break;
+            case QuestionType.ACL_EVALUATION:
+                if (q.acl) setCorrectAclAnswer(evaluateAcl(q.acl));
+                break;
+            case QuestionType.STP_ROOT_BRIDGE:
+                if (q.stp) setCorrectStpAnswer(findStpRootBridge(q.stp.switches));
+                break;
+            case QuestionType.PROTOCOL_IDENTIFICATION:
+                 if (q.protocol) setCorrectProtocolAnswer(getProtocolAnswer(q.protocol.text));
+                break;
         }
     }, []);
 
-    useEffect(() => {
-        newQuestion();
-    }, [newQuestion]);
+    useEffect(() => { newQuestion() }, [newQuestion]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isAnswered) return;
-        const { name, value } = e.target;
-        setUserAnswers(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleVlsmInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isAnswered) return;
-        const { name, value } = e.target;
-        setVlsmUserAnswer(prev => ({ ...prev, [name]: value }));
-    };
-    
-    const handleSingleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isAnswered) return;
-        setUserSingleAnswer(e.target.value);
-    };
-
+    // --- Handlers ---
     const checkAnswers = () => {
         if (!question || isAnswered) return;
         setShowSolution(false);
-
         let isCorrect = false;
 
         switch (question.type) {
-            case QuestionType.FULL_DETAILS: {
-                if (!solution) return; // FIX: Prevent crash if solution is not ready
-                const newFeedback: Feedback = {};
-                const keysToCheck: (keyof UserAnswers)[] = ['networkAddress', 'subnetMask', 'firstUsableHost', 'lastUsableHost', 'broadcastAddress', 'numberOfHosts'];
-                for (const key of keysToCheck) {
-                    newFeedback[key] = String(userAnswers[key] || '').trim().toLowerCase() === String(solution[key]).toLowerCase();
-                }
-                setFeedback(newFeedback);
-                isCorrect = keysToCheck.every(key => newFeedback[key]);
+            case QuestionType.FULL_DETAILS:
+                if (!subnettingSolution) return;
+                const newFeedback: SubnettingFeedback = {};
+                const keys: (keyof UserSubnettingAnswers)[] = ['networkAddress', 'subnetMask', 'firstUsableHost', 'lastUsableHost', 'broadcastAddress', 'numberOfHosts'];
+                keys.forEach(key => newFeedback[key] = String(userSubnettingAnswers[key] || '').trim().toLowerCase() === String(subnettingSolution[key]).toLowerCase());
+                setSubnettingFeedback(newFeedback);
+                isCorrect = keys.every(key => newFeedback[key]);
                 break;
-            }
             case QuestionType.HOW_MANY_HOSTS:
             case QuestionType.HOW_MANY_SUBNETS:
-            case QuestionType.SCENARIO_CIDR_FOR_HOSTS: {
-                const correct = String(userSingleAnswer).trim().toLowerCase() === String(correctSingleAnswer).toLowerCase();
-                setSingleFeedback(correct);
-                isCorrect = correct;
+            case QuestionType.SCENARIO_CIDR_FOR_HOSTS:
+                isCorrect = String(userSingleAnswer).trim().toLowerCase() === String(correctSingleAnswer).toLowerCase();
+                setSingleFeedback(isCorrect);
                 break;
-            }
-            case QuestionType.VLSM_SCENARIO: {
+            case QuestionType.VLSM_SCENARIO:
                 const feedback = {
                     networkAddress: vlsmUserAnswer.networkAddress.trim() === vlsmCorrectAnswer.networkAddress,
                     cidr: vlsmUserAnswer.cidr.trim() === vlsmCorrectAnswer.cidr
@@ -132,15 +141,21 @@ const PracticeSection: React.FC = () => {
                 setVlsmFeedback(feedback);
                 isCorrect = feedback.networkAddress && feedback.cidr;
                 break;
-            }
+            case QuestionType.ACL_EVALUATION:
+                isCorrect = userAclAnswer === correctAclAnswer;
+                setAclFeedback(isCorrect);
+                break;
+            case QuestionType.STP_ROOT_BRIDGE:
+                isCorrect = userStpAnswer === correctStpAnswer;
+                setStpFeedback(isCorrect);
+                break;
+            case QuestionType.PROTOCOL_IDENTIFICATION:
+                isCorrect = userProtocolAnswer === correctProtocolAnswer;
+                setProtocolFeedback(isCorrect);
+                break;
         }
         
-        const newStats = { ...stats };
-        if (isCorrect) {
-            newStats.correct += 1;
-        } else {
-            newStats.incorrect += 1;
-        }
+        const newStats = { correct: stats.correct + (isCorrect ? 1 : 0), incorrect: stats.incorrect + (isCorrect ? 0 : 1) };
         setStats(newStats);
         localStorage.setItem('subnetting-stats', JSON.stringify(newStats));
         setIsAnswered(true);
@@ -152,10 +167,12 @@ const PracticeSection: React.FC = () => {
         localStorage.setItem('subnetting-stats', JSON.stringify(newStats));
     };
 
-    const renderFullDetailsQuestion = () => {
-        if (!question || !solution || !question.ipAddress || typeof question.cidr === 'undefined') return null;
+    // --- RENDER FUNCTIONS ---
+    
+    const renderFullDetailsQuestion = () => { /* ... (no changes to this function) ... */ 
+         if (!question || !subnettingSolution || !question.ipAddress || typeof question.cidr === 'undefined') return null;
         
-        const inputFields: { key: keyof UserAnswers; label: string }[] = [
+        const inputFields: { key: keyof UserSubnettingAnswers; label: string }[] = [
             { key: 'networkAddress', label: 'عنوان الشبكة' },
             { key: 'subnetMask', label: 'قناع الشبكة' },
             { key: 'firstUsableHost', label: 'أول IP صالح' },
@@ -178,24 +195,23 @@ const PracticeSection: React.FC = () => {
                                 type="text"
                                 id={key}
                                 name={key}
-                                value={userAnswers[key] || ''}
-                                onChange={handleInputChange}
+                                value={userSubnettingAnswers[key] || ''}
+                                onChange={(e) => !isAnswered && setUserSubnettingAnswers(prev => ({ ...prev, [e.target.name]: e.target.value }))}
                                 readOnly={isAnswered}
                                 className={`w-full p-3 bg-gray-700 border rounded-lg text-white font-mono text-lg focus:ring-2 transition-all ${
-                                    isAnswered && feedback[key] === true ? 'border-green-500 bg-green-500/10' : 
-                                    isAnswered && feedback[key] === false ? 'border-red-500 bg-red-500/10' : 
+                                    isAnswered && subnettingFeedback[key] === true ? 'border-green-500 bg-green-500/10' : 
+                                    isAnswered && subnettingFeedback[key] === false ? 'border-red-500 bg-red-500/10' : 
                                     'border-gray-600 focus:border-cyan-500 focus:ring-cyan-500/50'
                                 }`}
                             />
-                             {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{solution[key as keyof SubnettingSolution]}</p>}
+                             {showSolution && <p className="mt-2 text-sm text-green-400 font-mono">{subnettingSolution[key as keyof SubnettingSolution]}</p>}
                         </div>
                     ))}
                 </div>
             </>
         );
-    };
-
-    const renderSingleAnswerQuestion = (questionText: string) => {
+    }
+    const renderSingleAnswerQuestion = (questionText: string) => { /* ... (no changes) ... */
         return (
             <div className="max-w-md mx-auto">
                 <div className="bg-gray-900 p-6 rounded-lg mb-6 border border-cyan-500/30">
@@ -208,7 +224,7 @@ const PracticeSection: React.FC = () => {
                         id="singleAnswer"
                         name="singleAnswer"
                         value={userSingleAnswer}
-                        onChange={handleSingleInputChange}
+                        onChange={(e) => !isAnswered && setUserSingleAnswer(e.target.value)}
                         readOnly={isAnswered}
                         className={`w-full p-3 bg-gray-700 border rounded-lg text-white font-mono text-2xl text-center focus:ring-2 transition-all ${
                             isAnswered && singleFeedback === true ? 'border-green-500 bg-green-500/10' : 
@@ -221,10 +237,9 @@ const PracticeSection: React.FC = () => {
                 </div>
             </div>
         );
-    };
-
-    const renderVlsmQuestion = () => {
-        if (!question || !question.baseNetwork || typeof question.baseCidr === 'undefined' || !question.vlsmHostRequirements || typeof question.vlsmTargetRequirement === 'undefined') return null;
+    }
+    const renderVlsmQuestion = () => { /* ... (no changes) ... */
+         if (!question || !question.baseNetwork || typeof question.baseCidr === 'undefined' || !question.vlsmHostRequirements || typeof question.vlsmTargetRequirement === 'undefined') return null;
 
         return (
             <div className="max-w-2xl mx-auto">
@@ -233,8 +248,8 @@ const PracticeSection: React.FC = () => {
                     <p className="text-3xl font-mono text-yellow-400 tracking-wider">{question.baseNetwork}/{question.baseCidr}</p>
                     <p className="text-lg text-gray-400 mt-4 mb-2">والمطلوب إنشاء شبكات فرعية للمتطلبات التالية:</p>
                     <div className="flex justify-center gap-4 flex-wrap">
-                        {question.vlsmHostRequirements.map(req => (
-                            <span key={req} className={`bg-gray-700 text-sm font-medium me-2 px-2.5 py-0.5 rounded ${req === question.vlsmTargetRequirement ? 'text-yellow-300 ring-2 ring-yellow-400' : 'text-gray-200'}`}>
+                        {question.vlsmHostRequirements.map((req, i) => (
+                            <span key={`${req}-${i}`} className={`bg-gray-700 text-sm font-medium me-2 px-2.5 py-0.5 rounded ${req === question.vlsmTargetRequirement ? 'text-yellow-300 ring-2 ring-yellow-400' : 'text-gray-200'}`}>
                                 {req} جهاز
                             </span>
                         ))}
@@ -253,7 +268,7 @@ const PracticeSection: React.FC = () => {
                             id="networkAddress"
                             name="networkAddress"
                             value={vlsmUserAnswer.networkAddress}
-                            onChange={handleVlsmInputChange}
+                            onChange={(e) => !isAnswered && setVlsmUserAnswer(prev => ({...prev, networkAddress: e.target.value}))}
                             readOnly={isAnswered}
                              className={`w-full p-3 bg-gray-700 border rounded-lg text-white font-mono text-lg focus:ring-2 transition-all ${
                                 isAnswered && vlsmFeedback.networkAddress === true ? 'border-green-500 bg-green-500/10' : 
@@ -270,7 +285,7 @@ const PracticeSection: React.FC = () => {
                             id="cidr"
                             name="cidr"
                             value={vlsmUserAnswer.cidr}
-                            onChange={handleVlsmInputChange}
+                            onChange={(e) => !isAnswered && setVlsmUserAnswer(prev => ({...prev, cidr: e.target.value}))}
                             readOnly={isAnswered}
                              className={`w-full p-3 bg-gray-700 border rounded-lg text-white font-mono text-lg focus:ring-2 transition-all ${
                                 isAnswered && vlsmFeedback.cidr === true ? 'border-green-500 bg-green-500/10' : 
@@ -284,23 +299,107 @@ const PracticeSection: React.FC = () => {
             </div>
         );
     }
-    
+    const renderAclQuestion = () => {
+        if (!question?.acl) return null;
+        const { rules, packet } = question.acl;
+        return (
+            <div className="max-w-2xl mx-auto">
+                <p className="text-xl text-center text-gray-200 mb-4">بالنظر إلى قائمة التحكم (ACL) أدناه، هل سيتم السماح أم رفض الحزمة التالية؟</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-gray-900 p-4 rounded-lg">
+                        <h4 className="font-bold text-lg text-cyan-400 mb-2">قائمة التحكم</h4>
+                        <pre className="bg-black text-cyan-300 p-3 rounded-md font-mono text-sm">{rules.join('\n')}<br/><span className="text-red-500/50">(implicit deny any)</span></pre>
+                    </div>
+                    <div className="bg-gray-900 p-4 rounded-lg">
+                         <h4 className="font-bold text-lg text-cyan-400 mb-2">الحزمة</h4>
+                         <ul className="font-mono text-sm space-y-1">
+                             <li><span className="text-gray-400">Src IP:</span> <span className="text-yellow-300">{packet.srcIp}</span></li>
+                             <li><span className="text-gray-400">Dst IP:</span> <span className="text-yellow-300">{packet.dstIp}</span></li>
+                             <li><span className="text-gray-400">Protocol:</span> <span className="text-yellow-300">{packet.protocol}</span></li>
+                             <li><span className="text-gray-400">Dst Port:</span> <span className="text-yellow-300">{packet.dstPort}</span></li>
+                         </ul>
+                    </div>
+                </div>
+                <div className="flex justify-center gap-4 mt-6">
+                    {(['Permit', 'Deny'] as const).map(answer => (
+                        <button key={answer} onClick={() => !isAnswered && setUserAclAnswer(answer)} disabled={isAnswered} className={`px-8 py-3 font-bold text-lg rounded-lg transition-all transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100 ${userAclAnswer === answer ? 'ring-2 ring-offset-2 ring-offset-gray-800' : ''} ${
+                            isAnswered ? (correctAclAnswer === answer ? 'bg-green-600 text-white ring-green-400' : 'bg-red-600 text-white ring-red-400') 
+                                       : (answer === 'Permit' ? 'bg-green-700 hover:bg-green-600' : 'bg-red-700 hover:bg-red-600')
+                        } ${userAclAnswer === answer && !isAnswered ? 'ring-cyan-400' : 'ring-transparent'}`}>
+                            {answer === 'Permit' ? 'السماح' : 'الرفض'}
+                        </button>
+                    ))}
+                </div>
+                {showSolution && <p className="mt-4 text-lg text-center font-bold" style={{color: correctAclAnswer === 'Permit' ? '#4ade80' : '#f87171'}}>الحل الصحيح: {correctAclAnswer === 'Permit' ? 'السماح' : 'الرفض'}</p>}
+            </div>
+        );
+    };
+
+    const renderStpQuestion = () => {
+        if (!question?.stp) return null;
+        const { switches } = question.stp;
+        return (
+            <div className="max-w-3xl mx-auto">
+                <p className="text-xl text-center text-gray-200 mb-6">بالنظر إلى المحولات التالية، أي منها سيتم انتخابه كـ <strong className="text-cyan-400">جسر جذري (Root Bridge)</strong>؟</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {switches.map(sw => (
+                        <div key={sw.name} className={`p-4 rounded-lg text-center border-2 transition-all ${userStpAnswer === sw.name ? 'border-cyan-400 bg-cyan-900/50' : 'border-gray-700 bg-gray-900'}`}>
+                            <h4 className="font-bold text-2xl text-white">{sw.name}</h4>
+                            <div className="mt-2 font-mono text-sm">
+                                <p><span className="text-gray-400">Priority:</span> <span className="text-yellow-300">{sw.priority}</span></p>
+                                <p><span className="text-gray-400">MAC:</span> <span className="text-yellow-300">{sw.mac}</span></p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                 <div className="flex justify-center gap-4 mt-6">
+                    {switches.map(sw => (
+                        <button key={sw.name} onClick={() => !isAnswered && setUserStpAnswer(sw.name)} disabled={isAnswered} className={`px-8 py-3 font-bold text-lg rounded-lg transition-all transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100 ${userStpAnswer === sw.name ? 'ring-2 ring-offset-2 ring-offset-gray-800' : ''} ${
+                            isAnswered ? (correctStpAnswer === sw.name ? 'bg-green-600 text-white ring-green-400' : 'bg-gray-700') 
+                                       : 'bg-cyan-700 hover:bg-cyan-600'
+                        } ${userStpAnswer === sw.name && !isAnswered ? 'ring-cyan-400' : 'ring-transparent'}`}>
+                            {sw.name}
+                        </button>
+                    ))}
+                </div>
+                {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctStpAnswer}</p>}
+            </div>
+        );
+    };
+
+    const renderProtocolIdQuestion = () => {
+        if (!question?.protocol) return null;
+        const { text, options } = question.protocol;
+        return (
+            <div className="max-w-xl mx-auto">
+                <p className="text-xl text-center text-gray-200 mb-6">{text}</p>
+                <div className="grid grid-cols-2 gap-4">
+                    {options.map(option => (
+                        <button key={option} onClick={() => !isAnswered && setUserProtocolAnswer(option)} disabled={isAnswered} className={`p-4 font-semibold text-lg rounded-lg text-center transition-all disabled:cursor-not-allowed ${userProtocolAnswer === option ? 'ring-2 ring-offset-2 ring-offset-gray-800' : ''} ${
+                            isAnswered ? (correctProtocolAnswer === option ? 'bg-green-600 text-white ring-green-400' : 'bg-gray-700') 
+                                       : 'bg-gray-700 hover:bg-cyan-800'
+                        } ${userProtocolAnswer === option && !isAnswered ? 'ring-cyan-400' : 'ring-transparent'}`}>
+                            {option}
+                        </button>
+                    ))}
+                </div>
+                 {showSolution && <p className="mt-4 text-lg text-center font-bold text-green-400">الحل الصحيح: {correctProtocolAnswer}</p>}
+            </div>
+        );
+    };
+
     const renderQuestion = () => {
         if (!question) return null;
-
         switch (question.type) {
-            case QuestionType.FULL_DETAILS:
-                return renderFullDetailsQuestion();
-            case QuestionType.HOW_MANY_SUBNETS:
-                return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الشبكات الفرعية التي يمكن إنشاؤها؟`);
-            case QuestionType.HOW_MANY_HOSTS:
-                return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الأجهزة الصالحة للاستخدام في كل شبكة فرعية؟`);
-            case QuestionType.SCENARIO_CIDR_FOR_HOSTS:
-                return renderSingleAnswerQuestion(`شركة تحتاج إلى شبكة تتسع لـ ${question.requiredHosts} موظفًا. ما هو أفضل وأكفأ قناع شبكة بصيغة CIDR (مثال: /26) يمكن استخدامه؟`);
-            case QuestionType.VLSM_SCENARIO:
-                return renderVlsmQuestion();
-            default:
-                return <p>حدث خطأ غير متوقع.</p>
+            case QuestionType.FULL_DETAILS: return renderFullDetailsQuestion();
+            case QuestionType.HOW_MANY_SUBNETS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الشبكات الفرعية التي يمكن إنشاؤها؟`);
+            case QuestionType.HOW_MANY_HOSTS: return renderSingleAnswerQuestion(`بالنسبة للشبكة ${question.ipAddress}/${question.cidr}، كم عدد الأجهزة الصالحة للاستخدام في كل شبكة فرعية؟`);
+            case QuestionType.SCENARIO_CIDR_FOR_HOSTS: return renderSingleAnswerQuestion(`شركة تحتاج إلى شبكة تتسع لـ ${question.requiredHosts} موظفًا. ما هو أفضل وأكفأ قناع شبكة بصيغة CIDR (مثال: /26) يمكن استخدامه؟`);
+            case QuestionType.VLSM_SCENARIO: return renderVlsmQuestion();
+            case QuestionType.ACL_EVALUATION: return renderAclQuestion();
+            case QuestionType.STP_ROOT_BRIDGE: return renderStpQuestion();
+            case QuestionType.PROTOCOL_IDENTIFICATION: return renderProtocolIdQuestion();
+            default: return <p>حدث خطأ غير متوقع.</p>;
         }
     }
 
@@ -312,31 +411,17 @@ const PracticeSection: React.FC = () => {
         <div>
             <h2 className="text-3xl font-bold text-cyan-400 mb-4 text-center">اختبر معلوماتك</h2>
             <div className="max-w-md mx-auto bg-gray-900/50 rounded-lg p-3 mb-6 flex justify-around items-center">
-                <div className="text-center">
-                    <span className="text-sm text-gray-400">صحيحة</span>
-                    <p className="text-2xl font-bold text-green-400">{stats.correct}</p>
-                </div>
-                 <div className="text-center">
-                    <span className="text-sm text-gray-400">خاطئة</span>
-                    <p className="text-2xl font-bold text-red-400">{stats.incorrect}</p>
-                </div>
-                <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">
-                    تصفير
-                </button>
+                <div className="text-center"><span className="text-sm text-gray-400">صحيحة</span><p className="text-2xl font-bold text-green-400">{stats.correct}</p></div>
+                <div className="text-center"><span className="text-sm text-gray-400">خاطئة</span><p className="text-2xl font-bold text-red-400">{stats.incorrect}</p></div>
+                <button onClick={resetStats} className="text-xs bg-gray-700 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-colors">تصفير</button>
             </div>
             
-            {renderQuestion()}
+            <div className="min-h-[300px] flex flex-col justify-center">{renderQuestion()}</div>
             
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                 <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">
-                    تحقق من الإجابة
-                </button>
-                <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
-                    {showSolution ? 'إخفاء الحل' : 'أظهر الحل'}
-                </button>
-                <button onClick={newQuestion} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
-                    سؤال جديد
-                </button>
+                 <button onClick={checkAnswers} disabled={isAnswered} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100">تحقق من الإجابة</button>
+                <button onClick={() => setShowSolution(!showSolution)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">{showSolution ? 'إخفاء الحل' : 'أظهر الحل'}</button>
+                <button onClick={newQuestion} className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">سؤال جديد</button>
             </div>
         </div>
     );

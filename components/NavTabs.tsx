@@ -10,6 +10,9 @@ const NavTabs: React.FC<NavTabsProps> = ({ activeSection, setActiveSection }) =>
   const tabs = [
     { id: AppSection.Learn, label: 'التعلم والشرح' },
     { id: AppSection.Practice, label: 'الاختبار والتدريب' },
+    { id: AppSection.FLASHCARDS, label: 'بطاقات المراجعة' },
+    { id: AppSection.MINI_CLI_SIMULATOR, label: 'محاكي الأوامر' },
+    { id: AppSection.OSI_VISUALIZER, label: 'متصور التغليف' },
     { id: AppSection.Tricks, label: 'أسرار الحل السريع' },
     { id: AppSection.Protocols, label: 'شرح البروتوكولات' },
     { id: AppSection.IPv6, label: 'شرح IPv6' },

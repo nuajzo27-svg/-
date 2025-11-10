@@ -94,6 +94,40 @@ Address: 23.211.13.120`
 
 const ciscoSharedBasicCommands: CommandCardProps[] = [
      {
+        command: 'إعداد الراوتر الأولي (First-Time Setup)',
+        environment: 'Cisco IOS',
+        description: 'الخطوات الأساسية المتسلسلة لإعداد موجه جديد من الصفر: تغيير الاسم، تأمين الوصول، وحفظ الإعدادات.',
+        example: `! 1. Enter privileged mode, then global configuration mode
+Router> enable
+Router# configure terminal
+
+! 2. Set the router's hostname
+Router(config)# hostname R1
+
+! 3. Set an encrypted password for privileged mode
+R1(config)# enable secret class
+
+! 4. Configure and secure the console port
+R1(config)# line console 0
+R1(config-line)# password cisco
+R1(config-line)# login
+R1(config-line)# exit
+
+! 5. Configure and secure the VTY lines for remote access
+R1(config)# line vty 0 4
+R1(config-line)# password cisco
+R1(config-line)# login
+R1(config-line)# exit
+
+! 6. Return to privileged mode and save the configuration
+R1(config)# end
+R1# copy running-config startup-config
+Destination filename [startup-config]? [Enter]
+Building configuration...
+[OK]`,
+        isMultiStep: true,
+    },
+     {
         command: 'الإعدادات الأساسية المشتركة',
         environment: 'Cisco IOS',
         description: 'تشمل الأوامر الأساسية لإعداد أي جهاز سيسكو (راوتر أو سويتش)، مثل تغيير الاسم، تأمين الوصول بكلمات مرور مشفرة، تأمين المنافذ، إعداد لافتة تحذيرية، وتفعيل SSH للوصول الآمن.',
